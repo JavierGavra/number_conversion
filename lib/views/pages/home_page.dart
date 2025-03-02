@@ -52,6 +52,11 @@ class _HomePageState extends State<HomePage> {
               fit: BoxFit.cover,
             ),
           ),
+          Container(
+            width: screenSize.width,
+            height: screenSize.height,
+            color: Colors.black.withValues(alpha: 0.15),
+          ),
           SafeArea(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
