@@ -1,13 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:number_conversion/number_base/number_base.dart';
+import 'package:number_conversion/core/model/number_base/number_base.dart';
 
-part 'number_conversion_event.dart';
-part 'number_conversion_state.dart';
+part 'real_time_conversion_event.dart';
+part 'real_time_conversion_state.dart';
 
-class NumberConversionBloc
-    extends Bloc<NumberConversionEvent, NumberConversionState> {
-  NumberConversionBloc() : super(NumberConversionState.initial()) {
+class RealTimeConversionBloc
+    extends Bloc<RealTimeConversionEvent, RealTimeConversionState> {
+  RealTimeConversionBloc() : super(RealTimeConversionState.initial()) {
     on<ClearEvent>(_clearEventHandler);
     on<BinaryEvent>(_binaryEventHandler);
     on<DecimalEvent>(_decimalEventHandler);
@@ -17,9 +17,9 @@ class NumberConversionBloc
 
   Future<void> _clearEventHandler(
     ClearEvent event,
-    Emitter<NumberConversionState> emit,
+    Emitter<RealTimeConversionState> emit,
   ) async {
-    emit(NumberConversionState(
+    emit(RealTimeConversionState(
       status: state.status,
       binary: "0",
       decimal: "0",
@@ -30,11 +30,11 @@ class NumberConversionBloc
 
   Future<void> _binaryEventHandler(
     BinaryEvent event,
-    Emitter<NumberConversionState> emit,
+    Emitter<RealTimeConversionState> emit,
   ) async {
     final Binary binary = Binary(event.binary);
-    emit(NumberConversionState(
-      status: NumberConversionStateStatus.binary,
+    emit(RealTimeConversionState(
+      status: RealTimeConversionStateStatus.binary,
       binary: binary.toBinary(),
       decimal: binary.toDecimal(),
       octal: binary.toOctal(),
@@ -44,11 +44,11 @@ class NumberConversionBloc
 
   Future<void> _decimalEventHandler(
     DecimalEvent event,
-    Emitter<NumberConversionState> emit,
+    Emitter<RealTimeConversionState> emit,
   ) async {
     final Decimal decimal = Decimal(int.parse(event.decimal));
-    emit(NumberConversionState(
-      status: NumberConversionStateStatus.decimal,
+    emit(RealTimeConversionState(
+      status: RealTimeConversionStateStatus.decimal,
       binary: decimal.toBinary(),
       decimal: decimal.toDecimal(),
       octal: decimal.toOctal(),
@@ -58,29 +58,25 @@ class NumberConversionBloc
 
   Future<void> _octalEventHandler(
     OctalEvent event,
-    Emitter<NumberConversionState> emit,
+    Emitter<RealTimeConversionState> emit,
   ) async {
-    try {
-      final Octal octal = Octal(int.parse(event.octal));
-      emit(NumberConversionState(
-        status: NumberConversionStateStatus.octal,
-        binary: octal.toBinary(),
-        decimal: octal.toDecimal(),
-        octal: octal.toOctal(),
-        hexadecimal: octal.toHexadecimal(),
-      ));
-    } catch (e) {
-      print(e);
-    }
+    final Octal octal = Octal(int.parse(event.octal));
+    emit(RealTimeConversionState(
+      status: RealTimeConversionStateStatus.octal,
+      binary: octal.toBinary(),
+      decimal: octal.toDecimal(),
+      octal: octal.toOctal(),
+      hexadecimal: octal.toHexadecimal(),
+    ));
   }
 
   Future<void> _hexadecimalEventHandler(
     HexadecimalEvent event,
-    Emitter<NumberConversionState> emit,
+    Emitter<RealTimeConversionState> emit,
   ) async {
     final Hexadecimal hexadecimal = Hexadecimal(event.hexadecimal);
-    emit(NumberConversionState(
-      status: NumberConversionStateStatus.hexadecimal,
+    emit(RealTimeConversionState(
+      status: RealTimeConversionStateStatus.hexadecimal,
       binary: hexadecimal.toBinary(),
       decimal: hexadecimal.toDecimal(),
       octal: hexadecimal.toOctal(),

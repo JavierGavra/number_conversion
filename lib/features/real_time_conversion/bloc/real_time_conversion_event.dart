@@ -1,15 +1,15 @@
-part of 'number_conversion_bloc.dart';
+part of 'real_time_conversion_bloc.dart';
 
-sealed class NumberConversionEvent extends Equatable {
-  const NumberConversionEvent();
+sealed class RealTimeConversionEvent extends Equatable {
+  const RealTimeConversionEvent();
 
   @override
   List<Object?> get props => throw UnimplementedError();
 }
 
-class ClearEvent extends NumberConversionEvent {}
+class ClearEvent extends RealTimeConversionEvent {}
 
-class BinaryEvent extends NumberConversionEvent {
+class BinaryEvent extends RealTimeConversionEvent {
   final String binary;
 
   const BinaryEvent(this.binary);
@@ -18,7 +18,7 @@ class BinaryEvent extends NumberConversionEvent {
   List<Object?> get props => [binary];
 }
 
-class DecimalEvent extends NumberConversionEvent {
+class DecimalEvent extends RealTimeConversionEvent {
   final String decimal;
 
   const DecimalEvent(this.decimal);
@@ -27,7 +27,7 @@ class DecimalEvent extends NumberConversionEvent {
   List<Object?> get props => [decimal];
 }
 
-class OctalEvent extends NumberConversionEvent {
+class OctalEvent extends RealTimeConversionEvent {
   final String octal;
 
   const OctalEvent(this.octal);
@@ -36,7 +36,7 @@ class OctalEvent extends NumberConversionEvent {
   List<Object?> get props => [octal];
 }
 
-class HexadecimalEvent extends NumberConversionEvent {
+class HexadecimalEvent extends RealTimeConversionEvent {
   final String hexadecimal;
 
   const HexadecimalEvent(this.hexadecimal);

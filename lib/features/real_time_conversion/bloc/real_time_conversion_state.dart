@@ -1,15 +1,15 @@
-part of 'number_conversion_bloc.dart';
+part of 'real_time_conversion_bloc.dart';
 
-enum NumberConversionStateStatus { binary, decimal, octal, hexadecimal }
+enum RealTimeConversionStateStatus { binary, decimal, octal, hexadecimal }
 
-class NumberConversionState extends Equatable {
-  final NumberConversionStateStatus status;
+class RealTimeConversionState extends Equatable {
+  final RealTimeConversionStateStatus status;
   final String binary;
   final String decimal;
   final String octal;
   final String hexadecimal;
 
-  const NumberConversionState({
+  const RealTimeConversionState({
     required this.status,
     required this.binary,
     required this.decimal,
@@ -17,9 +17,9 @@ class NumberConversionState extends Equatable {
     required this.hexadecimal,
   });
 
-  const NumberConversionState.initial()
+  const RealTimeConversionState.initial()
       : this(
-          status: NumberConversionStateStatus.decimal,
+          status: RealTimeConversionStateStatus.decimal,
           binary: "0",
           decimal: "0",
           octal: "0",

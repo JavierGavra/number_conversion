@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:number_conversion/bloc/number_conversion_bloc.dart';
-import 'package:number_conversion/model/keyboard_button_model.dart';
+import 'package:number_conversion/features/real_time_conversion/bloc/real_time_conversion_bloc.dart';
+import 'package:number_conversion/core/model/keyboard_button_model.dart';
 
 class CustomKeyboardWidget extends StatelessWidget {
   const CustomKeyboardWidget({super.key});
 
   List<List<KeyboardButtonModel>> _definekeyboardLayoutMatrix(
-    NumberConversionState state,
+    RealTimeConversionState state,
   ) {
-    if (state.status == NumberConversionStateStatus.binary) {
+    if (state.status == RealTimeConversionStateStatus.binary) {
       return KeyboardLayoutMatrixModel.binary;
-    } else if (state.status == NumberConversionStateStatus.octal) {
+    } else if (state.status == RealTimeConversionStateStatus.octal) {
       return KeyboardLayoutMatrixModel.octal;
-    } else if (state.status == NumberConversionStateStatus.hexadecimal) {
+    } else if (state.status == RealTimeConversionStateStatus.hexadecimal) {
       return KeyboardLayoutMatrixModel.hexadecimal;
     } else {
       return KeyboardLayoutMatrixModel.decimal;
@@ -23,59 +23,59 @@ class CustomKeyboardWidget extends StatelessWidget {
   void _performInputButton(
     BuildContext context,
     String input,
-    NumberConversionState state,
+    RealTimeConversionState state,
   ) {
     String newInput;
-    if (state.status == NumberConversionStateStatus.binary) {
+    if (state.status == RealTimeConversionStateStatus.binary) {
       newInput = state.binary + input;
-      context.read<NumberConversionBloc>().add(BinaryEvent(newInput));
-    } else if (state.status == NumberConversionStateStatus.decimal) {
+      context.read<RealTimeConversionBloc>().add(BinaryEvent(newInput));
+    } else if (state.status == RealTimeConversionStateStatus.decimal) {
       newInput = state.decimal + input;
-      context.read<NumberConversionBloc>().add(DecimalEvent(newInput));
-    } else if (state.status == NumberConversionStateStatus.octal) {
+      context.read<RealTimeConversionBloc>().add(DecimalEvent(newInput));
+    } else if (state.status == RealTimeConversionStateStatus.octal) {
       newInput = state.octal + input;
-      context.read<NumberConversionBloc>().add(OctalEvent(newInput));
-    } else if (state.status == NumberConversionStateStatus.hexadecimal) {
+      context.read<RealTimeConversionBloc>().add(OctalEvent(newInput));
+    } else if (state.status == RealTimeConversionStateStatus.hexadecimal) {
       if (state.hexadecimal == "0") {
         newInput = input;
       } else {
         newInput = state.hexadecimal + input;
       }
-      context.read<NumberConversionBloc>().add(HexadecimalEvent(newInput));
+      context.read<RealTimeConversionBloc>().add(HexadecimalEvent(newInput));
     }
   }
 
   void _performBackspaceButton(
     BuildContext context,
-    NumberConversionState state,
+    RealTimeConversionState state,
   ) {
     String newInput;
-    if (state.status == NumberConversionStateStatus.binary) {
+    if (state.status == RealTimeConversionStateStatus.binary) {
       newInput = (state.binary.length == 1)
           ? "0"
           : state.binary.substring(0, state.binary.length - 1);
-      context.read<NumberConversionBloc>().add(BinaryEvent(newInput));
-    } else if (state.status == NumberConversionStateStatus.decimal) {
+      context.read<RealTimeConversionBloc>().add(BinaryEvent(newInput));
+    } else if (state.status == RealTimeConversionStateStatus.decimal) {
       newInput = (state.decimal.length == 1)
           ? "0"
           : state.decimal.substring(0, state.decimal.length - 1);
-      context.read<NumberConversionBloc>().add(DecimalEvent(newInput));
-    } else if (state.status == NumberConversionStateStatus.octal) {
+      context.read<RealTimeConversionBloc>().add(DecimalEvent(newInput));
+    } else if (state.status == RealTimeConversionStateStatus.octal) {
       newInput = (state.octal.length == 1)
           ? "0"
           : state.octal.substring(0, state.octal.length - 1);
-      context.read<NumberConversionBloc>().add(OctalEvent(newInput));
-    } else if (state.status == NumberConversionStateStatus.hexadecimal) {
+      context.read<RealTimeConversionBloc>().add(OctalEvent(newInput));
+    } else if (state.status == RealTimeConversionStateStatus.hexadecimal) {
       newInput = (state.hexadecimal.length == 1)
           ? "0"
           : state.hexadecimal.substring(0, state.hexadecimal.length - 1);
-      context.read<NumberConversionBloc>().add(HexadecimalEvent(newInput));
+      context.read<RealTimeConversionBloc>().add(HexadecimalEvent(newInput));
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<NumberConversionBloc, NumberConversionState>(
+    return BlocBuilder<RealTimeConversionBloc, RealTimeConversionState>(
       builder: (context, state) {
         final List<List<KeyboardButtonModel>> keyboardLayoutMatrix =
             _definekeyboardLayoutMatrix(state);
@@ -140,7 +140,7 @@ class CustomKeyboardWidget extends StatelessWidget {
   Widget _buildInputButton(
     BuildContext context, {
     required KeyboardButtonModel keyboardButton,
-    required NumberConversionState state,
+    required RealTimeConversionState state,
   }) {
     return Expanded(
       child: SizedBox(
@@ -166,7 +166,7 @@ class CustomKeyboardWidget extends StatelessWidget {
   Widget _buildAdditionalButton(
     BuildContext context, {
     required String label,
-    required NumberConversionState state,
+    required RealTimeConversionState state,
   }) {
     final ColorScheme color = Theme.of(context).colorScheme;
     return Expanded(
@@ -175,7 +175,7 @@ class CustomKeyboardWidget extends StatelessWidget {
         child: FilledButton.tonal(
           onPressed: () {
             if (label == "Clear") {
-              context.read<NumberConversionBloc>().add(ClearEvent());
+              context.read<RealTimeConversionBloc>().add(ClearEvent());
             } else if (label == "⌫") {
               _performBackspaceButton(context, state);
             }

@@ -2,30 +2,30 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:number_conversion/bloc/number_conversion_bloc.dart';
-import 'package:number_conversion/utils/format_text.dart';
-import 'package:number_conversion/views/widgets/custom_keyboard_widget.dart';
+import 'package:number_conversion/features/real_time_conversion/bloc/real_time_conversion_bloc.dart';
+import 'package:number_conversion/core/utils/format_text.dart';
+import 'package:number_conversion/core/widgets/custom_keyboard_widget.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class RealTimeConversionPage extends StatefulWidget {
+  const RealTimeConversionPage({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<RealTimeConversionPage> createState() => _RealTimeConversionPageState();
 }
 
-class _HomePageState extends State<HomePage> {
-  late NumberConversionState _state = NumberConversionState.initial();
+class _RealTimeConversionPageState extends State<RealTimeConversionPage> {
+  late RealTimeConversionState _state = RealTimeConversionState.initial();
 
-  void _selectMode(NumberConversionStateStatus id) {
-    if (id == NumberConversionStateStatus.binary) {
-      context.read<NumberConversionBloc>().add(BinaryEvent(_state.binary));
-    } else if (id == NumberConversionStateStatus.decimal) {
-      context.read<NumberConversionBloc>().add(DecimalEvent(_state.decimal));
-    } else if (id == NumberConversionStateStatus.octal) {
-      context.read<NumberConversionBloc>().add(OctalEvent(_state.octal));
-    } else if (id == NumberConversionStateStatus.hexadecimal) {
+  void _selectMode(RealTimeConversionStateStatus id) {
+    if (id == RealTimeConversionStateStatus.binary) {
+      context.read<RealTimeConversionBloc>().add(BinaryEvent(_state.binary));
+    } else if (id == RealTimeConversionStateStatus.decimal) {
+      context.read<RealTimeConversionBloc>().add(DecimalEvent(_state.decimal));
+    } else if (id == RealTimeConversionStateStatus.octal) {
+      context.read<RealTimeConversionBloc>().add(OctalEvent(_state.octal));
+    } else if (id == RealTimeConversionStateStatus.hexadecimal) {
       context
-          .read<NumberConversionBloc>()
+          .read<RealTimeConversionBloc>()
           .add(HexadecimalEvent(_state.hexadecimal));
     }
   }
@@ -41,6 +41,14 @@ class _HomePageState extends State<HomePage> {
         title: const Text("Konversi Sistem Bilangan"),
         backgroundColor: Colors.transparent,
         foregroundColor: color.primaryContainer,
+        leading: Builder(
+          builder: (context) {
+            return IconButton(
+              onPressed: () => Scaffold.of(context).openDrawer(),
+              icon: Icon(Icons.menu),
+            );
+          },
+        ),
       ),
       body: Stack(
         children: [
@@ -61,7 +69,7 @@ class _HomePageState extends State<HomePage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BlocConsumer<NumberConversionBloc, NumberConversionState>(
+                BlocConsumer<RealTimeConversionBloc, RealTimeConversionState>(
                   listener: (context, state) => _state = state,
                   builder: (context, state) {
                     return Expanded(
@@ -75,22 +83,22 @@ class _HomePageState extends State<HomePage> {
                             _buildTextField(
                               context,
                               label: "HEX",
-                              id: NumberConversionStateStatus.hexadecimal,
+                              id: RealTimeConversionStateStatus.hexadecimal,
                             ),
                             _buildTextField(
                               context,
                               label: "DEC",
-                              id: NumberConversionStateStatus.decimal,
+                              id: RealTimeConversionStateStatus.decimal,
                             ),
                             _buildTextField(
                               context,
                               label: "OCT",
-                              id: NumberConversionStateStatus.octal,
+                              id: RealTimeConversionStateStatus.octal,
                             ),
                             _buildTextField(
                               context,
                               label: "BIN",
-                              id: NumberConversionStateStatus.binary,
+                              id: RealTimeConversionStateStatus.binary,
                             ),
                           ],
                         ),
@@ -112,25 +120,69 @@ class _HomePageState extends State<HomePage> {
           ),
         ],
       ),
+      drawer: Drawer(
+        // Add a ListView to the drawer. This ensures the user can scroll
+        // through the options in the drawer if there isn't enough vertical
+        // space to fit everything.
+        child: ListView(
+          // Important: Remove any padding from the ListView.
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Text('Drawer Header'),
+            ),
+            ListTile(
+              title: const Text('Home'),
+              selected: true,
+              onTap: () {
+                // Update the state of the app
+                // _onItemTapped(0);
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('Business'),
+              selected: false,
+              onTap: () {
+                // Update the state of the app
+                // _onItemTapped(1);
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+            ListTile(
+              title: const Text('School'),
+              selected: false,
+              onTap: () {
+                // Update the state of the app
+                // _onItemTapped(2);
+                // Then close the drawer
+                Navigator.pop(context);
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 
   Widget _buildTextField(
     BuildContext context, {
     required String label,
-    required NumberConversionStateStatus id,
+    required RealTimeConversionStateStatus id,
   }) {
     final ColorScheme color = Theme.of(context).colorScheme;
     String value = "0";
 
-    if (id == NumberConversionStateStatus.binary) {
+    if (id == RealTimeConversionStateStatus.binary) {
       value = formatBinary(_state.binary);
-      print(value.length);
-    } else if (id == NumberConversionStateStatus.decimal) {
+    } else if (id == RealTimeConversionStateStatus.decimal) {
       value = formatDecimal(_state.decimal);
-    } else if (id == NumberConversionStateStatus.octal) {
+    } else if (id == RealTimeConversionStateStatus.octal) {
       value = formatOctal(_state.octal);
-    } else if (id == NumberConversionStateStatus.hexadecimal) {
+    } else if (id == RealTimeConversionStateStatus.hexadecimal) {
       value = formatHexadecimal(_state.hexadecimal);
     }
 

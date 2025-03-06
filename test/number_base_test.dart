@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:number_conversion/number_base/number_base.dart';
+import 'package:number_conversion/core/model/number_base/number_base.dart';
 
 void main() {
   test("Decimal Test", () {
