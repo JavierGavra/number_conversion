@@ -1,16 +1,14 @@
 part of 'real_time_conversion_bloc.dart';
 
-enum RealTimeConversionStateStatus { binary, decimal, octal, hexadecimal }
-
 class RealTimeConversionState extends Equatable {
-  final RealTimeConversionStateStatus status;
+  final int from;
   final String binary;
   final String decimal;
   final String octal;
   final String hexadecimal;
 
   const RealTimeConversionState({
-    required this.status,
+    required this.from,
     required this.binary,
     required this.decimal,
     required this.octal,
@@ -19,7 +17,7 @@ class RealTimeConversionState extends Equatable {
 
   const RealTimeConversionState.initial()
       : this(
-          status: RealTimeConversionStateStatus.decimal,
+          from: NumberBaseType.decimal,
           binary: "0",
           decimal: "0",
           octal: "0",
@@ -27,5 +25,5 @@ class RealTimeConversionState extends Equatable {
         );
 
   @override
-  List<Object> get props => [status, binary, decimal, octal, hexadecimal];
+  List<Object> get props => [from, binary, decimal, octal, hexadecimal];
 }

@@ -7,40 +7,12 @@ sealed class RealTimeConversionEvent extends Equatable {
   List<Object?> get props => throw UnimplementedError();
 }
 
-class ClearEvent extends RealTimeConversionEvent {}
+class ConversionEvent extends RealTimeConversionEvent {
+  final int from;
+  final String value;
 
-class BinaryEvent extends RealTimeConversionEvent {
-  final String binary;
-
-  const BinaryEvent(this.binary);
-
-  @override
-  List<Object?> get props => [binary];
-}
-
-class DecimalEvent extends RealTimeConversionEvent {
-  final String decimal;
-
-  const DecimalEvent(this.decimal);
+  const ConversionEvent({required this.from, required this.value});
 
   @override
-  List<Object?> get props => [decimal];
-}
-
-class OctalEvent extends RealTimeConversionEvent {
-  final String octal;
-
-  const OctalEvent(this.octal);
-
-  @override
-  List<Object?> get props => [octal];
-}
-
-class HexadecimalEvent extends RealTimeConversionEvent {
-  final String hexadecimal;
-
-  const HexadecimalEvent(this.hexadecimal);
-
-  @override
-  List<Object?> get props => [hexadecimal];
+  List<Object?> get props => [from, value];
 }
