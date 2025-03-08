@@ -16,7 +16,7 @@ class MyApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: Provider.providers,
       child: MaterialApp(
-        title: 'Flutter Demo',
+        title: 'Konversi Sistem Bilangan',
         debugShowCheckedModeBanner: false,
         theme: ThemeData(
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
