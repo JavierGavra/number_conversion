@@ -16,7 +16,8 @@ final class Decimal implements NumberBaseCovert {
       value ~/= base;
 
       if (base == 16 && remainder > 9) {
-        result += String.fromCharCode(remainder + 55);
+        String letter = String.fromCharCode(remainder + 55);
+        result += letter;
       } else {
         result += remainder.toString();
       }
@@ -35,5 +36,5 @@ final class Decimal implements NumberBaseCovert {
   String toDecimal() => value.toString();
 
   @override
-  String toHexadecimal()  => _convertByBase(NumberBaseType.hexadecimal);
+  String toHexadecimal() => _convertByBase(NumberBaseType.hexadecimal);
 }

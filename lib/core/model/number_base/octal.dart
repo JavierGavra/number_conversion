@@ -6,7 +6,7 @@ final class Octal implements NumberBaseCovert {
 
   Octal(this.value) : assert(!(value.toString().contains(RegExp(r'[8-9]'))));
 
-  String _decimalToBinary3Digit(int value) {
+  String _decimalToBinary(int value) {
     String result = "";
     int remainder;
 
@@ -18,21 +18,17 @@ final class Octal implements NumberBaseCovert {
 
     result = result.reverse();
 
-    return result.padLeft(3, '0');
+    return result;
   }
 
-  int _toDecimalFromBinary(int value) {
+  int _binaryToDecimal(String value) {
     int result = 0;
-    int lastNumber = 0;
+    int i = 0;
 
-    int base = 1;
-    while (value != 0) {
-      lastNumber = value % 10;
-      result += (lastNumber * base);
-
-      value ~/= 10;
-
-      base *= 2;
+    for (int j = value.length - 1; j >= 0; j--) {
+      num resultPerBit = int.parse(value[j]) * pow(2, i);
+      result += resultPerBit.toInt();
+      i++;
     }
 
     return result;
@@ -40,16 +36,19 @@ final class Octal implements NumberBaseCovert {
 
   @override
   String toBinary() {
-    String value = this.value.toString();
+    String octal = value.toString();
     String result = "";
+    List<String> listOf3Bits = [];
 
-    if (value == "0") return value;
-
-    for (int i = 0; i < value.length; i++) {
-      result += _decimalToBinary3Digit(int.parse(value[i]));
+    for (int i = 0; i < octal.length; i++) {
+      listOf3Bits.add(_decimalToBinary(int.parse(octal[i])).padLeft(3, "0"));
     }
 
-    return result.replaceFirst(RegExp(r'^0+'), '');
+    for (var element in listOf3Bits) {
+      result += element;
+    }
+
+    return result == "000" ? "0" : result.replaceFirst(RegExp(r'^0+'), '');
   }
 
   @override
@@ -57,18 +56,14 @@ final class Octal implements NumberBaseCovert {
 
   @override
   String toDecimal() {
-    int value = this.value;
+    String octal = value.toString();
     int result = 0;
-    int lastNumber = 0;
+    int i = 0;
 
-    int base = 1;
-    while (value != 0) {
-      lastNumber = value % 10;
-      result += (lastNumber * base);
-
-      value ~/= 10;
-
-      base *= this.base;
+    for (int j = octal.length - 1; j >= 0; j--) {
+      num resultPerDecimal = int.parse(octal[j]) * pow(8, i);
+      result += resultPerDecimal.toInt();
+      i++;
     }
 
     return result.toString();
@@ -78,18 +73,24 @@ final class Octal implements NumberBaseCovert {
   String toHexadecimal() {
     String binary = toBinary();
     String result = "";
+    List<String> listOf4bits = [];
 
-    if (binary == "0") return binary;
+    for (int i = binary.length; i > 0; i -= 4) {
+      if (i < 4) {
+        listOf4bits.add(binary.substring(0, i).padLeft(4, "0"));
+        continue;
+      }
 
-    while (binary.length % 4 != 0) {
-      binary = '0$binary';
+      listOf4bits.add(binary.substring(i - 4, i));
     }
+    listOf4bits = listOf4bits.reversed.toList();
 
-    for (int i = 0; i < binary.length; i += 4) {
-      String last4Bit = binary.substring(i, i + 4);
-      int decimal = _toDecimalFromBinary(int.parse(last4Bit));
+    for (int i = 0; i < listOf4bits.length; i++) {
+      int decimal = _binaryToDecimal(listOf4bits[i]);
+
       if (decimal > 9) {
-        result += String.fromCharCode(decimal.toInt() + 55);
+        String letter = String.fromCharCode(decimal + 55);
+        result += letter;
       } else {
         result += decimal.toString();
       }
