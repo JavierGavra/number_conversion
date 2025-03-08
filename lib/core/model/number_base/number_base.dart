@@ -1,4 +1,4 @@
-import '../../../extension/string_extension.dart';
+import '../../extension/string_extension.dart';
 
 part 'decimal.dart';
 part 'binary.dart';

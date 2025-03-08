@@ -41,7 +41,14 @@ class _RealTimeConversionPageState extends State<RealTimeConversionPage> {
         leading: Builder(
           builder: (context) {
             return IconButton(
-              onPressed: () => Scaffold.of(context).openDrawer(),
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    behavior: SnackBarBehavior.floating,
+                    content: Text("Comming soon..."),
+                  ),
+                );
+              },
               icon: Icon(Icons.menu),
             );
           },

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:number_conversion/core/bloc/provider.dart';
-import 'package:number_conversion/features/conversion_with_step/views/pages/conversion_with_step_page.dart';
 import 'package:number_conversion/features/real_time_conversion/views/pages/real_time_conversion_page.dart';
 
 void main() {
@@ -23,8 +22,7 @@ class MyApp extends StatelessWidget {
           colorScheme: ColorScheme.fromSeed(seedColor: Colors.blueGrey),
           useMaterial3: true,
         ),
-        // home: const RealTimeConversionPage(),
-        home: const ConversionWithStepPage(),
+        home: const RealTimeConversionPage(),
       ),
     );
   }
