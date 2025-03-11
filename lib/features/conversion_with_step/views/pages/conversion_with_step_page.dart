@@ -7,8 +7,26 @@ import 'package:number_conversion/features/conversion_with_step/views/pages/step
 import 'package:number_conversion/features/custom_keyboard/views/widgets/custom_keyboard_widget.dart';
 import 'package:number_conversion/features/custom_keyboard/bloc/custom_keyboard_bloc.dart';
 
-class ConversionWithStepPage extends StatelessWidget {
+class ConversionWithStepPage extends StatefulWidget {
   const ConversionWithStepPage({super.key});
+
+  @override
+  State<ConversionWithStepPage> createState() => _ConversionWithStepPageState();
+}
+
+class _ConversionWithStepPageState extends State<ConversionWithStepPage> {
+  final ValueNotifier<int> _fromBase = ValueNotifier(NumberBaseType.decimal);
+  final ValueNotifier<int> _toBase = ValueNotifier(NumberBaseType.binary);
+
+  final List<DropdownMenuItem<int>> _numberBaseMenus = [
+    DropdownMenuItem(value: NumberBaseType.binary, child: Text("Binary")),
+    DropdownMenuItem(value: NumberBaseType.decimal, child: Text("Decimal")),
+    DropdownMenuItem(value: NumberBaseType.octal, child: Text("Octal")),
+    DropdownMenuItem(
+      value: NumberBaseType.hexadecimal,
+      child: Text("Hexadecimal"),
+    ),
+  ];
 
   @override
   Widget build(BuildContext context) {
@@ -57,12 +75,58 @@ class ConversionWithStepPage extends StatelessWidget {
                     );
                   },
                 ),
+                Container(
+                  height: 60,
+                  width: screenSize.width,
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: color.secondary.withValues(alpha: 0.2),
+                    border: Border.all(color: color.surface),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+                SizedBox(height: 15),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Row(
+                    spacing: 10,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _buildDropdownButton(
+                        context: context,
+                        label: "Dari :",
+                        valueNotfier: _fromBase,
+                      ),
+                      Icon(
+                        Icons.arrow_right_alt_rounded,
+                        color: color.primaryContainer,
+                      ),
+                      _buildDropdownButton(
+                        context: context,
+                        label: "Ke :",
+                        valueNotfier: _toBase,
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(height: 15),
+                Container(
+                  height: 60,
+                  width: screenSize.width,
+                  margin: EdgeInsets.symmetric(horizontal: 10),
+                  decoration: BoxDecoration(
+                    color: color.primary.withValues(alpha: 1),
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
+                SizedBox(height: 50),
                 Spacer(),
                 Container(
                   width: screenSize.width,
                   margin: EdgeInsets.symmetric(horizontal: 10),
                   child: FilledButton(
                     onPressed: () {
+                      print("${_fromBase.value} -> ${_toBase.value}");
                       Hexadecimal hexadecimal = Hexadecimal("2E43C6");
                       Navigator.push(
                         context,
@@ -97,6 +161,41 @@ class ConversionWithStepPage extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildDropdownButton({
+    required BuildContext context,
+    required String label,
+    required ValueNotifier valueNotfier,
+  }) {
+    final ColorScheme color = Theme.of(context).colorScheme;
+    return ValueListenableBuilder(
+      valueListenable: valueNotfier,
+      builder: (context, value, child) {
+        return Expanded(
+          child: DropdownButtonFormField<int>(
+            value: value,
+            iconEnabledColor: color.surfaceContainerHighest,
+            style: TextStyle(color: color.surface),
+            dropdownColor: color.secondary,
+            decoration: InputDecoration(
+              labelText: label,
+              labelStyle: TextStyle(color: color.surface),
+              filled: true,
+              fillColor: color.surfaceContainerHighest.withValues(alpha: 0.1),
+              enabledBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: color.surface),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderSide: BorderSide(color: color.surface),
+              ),
+            ),
+            onChanged: (value) => valueNotfier.value = value,
+            items: _numberBaseMenus,
+          ),
+        );
+      },
     );
   }
 }
