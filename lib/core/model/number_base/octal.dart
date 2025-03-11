@@ -6,7 +6,7 @@ final class Octal implements NumberBaseCovert {
 
   Octal(this.value) : assert(!(value.toString().contains(RegExp(r'[8-9]'))));
 
-  String _decimalToBinary3Digit(int value) {
+  String _decimalToBinary(int value) {
     String result = "";
     int remainder;
 
@@ -18,83 +18,114 @@ final class Octal implements NumberBaseCovert {
 
     result = result.reverse();
 
-    return result.padLeft(3, '0');
+    return result;
   }
 
-  int _toDecimalFromBinary(int value) {
+  int _binaryToDecimal(String value) {
     int result = 0;
-    int lastNumber = 0;
+    int i = 0;
 
-    int base = 1;
-    while (value != 0) {
-      lastNumber = value % 10;
-      result += (lastNumber * base);
-
-      value ~/= 10;
-
-      base *= 2;
+    for (int j = value.length - 1; j >= 0; j--) {
+      num resultPerBit = int.parse(value[j]) * pow(2, i);
+      result += resultPerBit.toInt();
+      i++;
     }
 
     return result;
   }
 
   @override
-  String toBinary() {
-    String value = this.value.toString();
+  NumberBaseResultModel toBinary() {
+    String octal = value.toString();
+    String step = "#Ubah setiap elemen menjadi binary 3 bit#\n";
     String result = "";
+    List<String> listOf3Bits = [];
 
-    if (value == "0") return value;
+    for (int i = 0; i < octal.length; i++) {
+      listOf3Bits.add(_decimalToBinary(int.parse(octal[i])).padLeft(3, "0"));
 
-    for (int i = 0; i < value.length; i++) {
-      result += _decimalToBinary3Digit(int.parse(value[i]));
+      step += "${octal[i]} = ${listOf3Bits[i]}\n";
     }
 
-    return result.replaceFirst(RegExp(r'^0+'), '');
+    step += "\n$listOf3Bits\n";
+    step += "#Lalu gabungkan masing-masing binary 3 bit menjadi 1 binary#";
+
+    for (var element in listOf3Bits) {
+      result += element;
+    }
+
+    return NumberBaseResultModel(
+      result: result == "000" ? "0" : result.replaceFirst(RegExp(r'^0+'), ''),
+      step: step,
+    );
   }
 
   @override
-  String toOctal() => value.toString();
+  NumberBaseResultModel toOctal() =>
+      NumberBaseResultModel.noStep(value.toString());
 
   @override
-  String toDecimal() {
-    int value = this.value;
+  NumberBaseResultModel toDecimal() {
+    String octal = value.toString();
     int result = 0;
-    int lastNumber = 0;
+    String step = "#Hitung dari belakang agar mudah#\n";
+    int i = 0;
 
-    int base = 1;
-    while (value != 0) {
-      lastNumber = value % 10;
-      result += (lastNumber * base);
+    for (int j = octal.length - 1; j >= 0; j--) {
+      num resultPerDecimal = int.parse(octal[j]) * pow(8, i);
+      result += resultPerDecimal.toInt();
 
-      value ~/= 10;
+      step += "${octal[j]} * (8^$i) = $resultPerDecimal\n";
 
-      base *= this.base;
+      i++;
     }
 
-    return result.toString();
+    step += "#Jumlahkan semua hasil#";
+
+    return NumberBaseResultModel(result: result.toString(), step: step);
   }
 
   @override
-  String toHexadecimal() {
-    String binary = toBinary();
+  NumberBaseResultModel toHexadecimal() {
+    NumberBaseResultModel binary = toBinary();
+    String step = binary.step;
     String result = "";
 
-    if (binary == "0") return binary;
+    step += "\n${binary.result}\n";
+    step += "#Lalu pisahkan binary menjadi 4 bit dari belakang#\n";
+    List<String> listOf4bits = [];
 
-    while (binary.length % 4 != 0) {
-      binary = '0$binary';
+    for (int i = binary.result.length; i > 0; i -= 4) {
+      if (i < 4) {
+        listOf4bits.add(binary.result.substring(0, i).padLeft(4, "0"));
+        continue;
+      }
+
+      listOf4bits.add(binary.result.substring(i - 4, i));
     }
+    listOf4bits = listOf4bits.reversed.toList();
 
-    for (int i = 0; i < binary.length; i += 4) {
-      String last4Bit = binary.substring(i, i + 4);
-      int decimal = _toDecimalFromBinary(int.parse(last4Bit));
+    step += "$listOf4bits\n";
+    step += "#Lalu ubah masing-masing 4 bit menjadi hexadecimal#\n";
+
+    for (int i = 0; i < listOf4bits.length; i++) {
+      int decimal = _binaryToDecimal(listOf4bits[i]);
+
+      step += "${listOf4bits[i]} = $decimal";
+
       if (decimal > 9) {
-        result += String.fromCharCode(decimal.toInt() + 55);
+        String letter = String.fromCharCode(decimal + 55);
+        result += letter;
+        step += " -> $letter";
       } else {
         result += decimal.toString();
       }
+
+      step += "\n";
     }
 
-    return result;
+    step += "#Gabungkan hasil konversi dari atas#";
+
+    return NumberBaseResultModel(result: result, step: step);
   }
 }

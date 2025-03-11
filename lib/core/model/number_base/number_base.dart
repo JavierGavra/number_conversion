@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../../extension/string_extension.dart';
 
 part 'decimal.dart';
@@ -6,10 +8,10 @@ part 'octal.dart';
 part 'hexadecimal.dart';
 
 abstract interface class NumberBaseCovert {
-  String toBinary();
-  String toOctal();
-  String toDecimal();
-  String toHexadecimal();
+  NumberBaseResultModel toBinary();
+  NumberBaseResultModel toOctal();
+  NumberBaseResultModel toDecimal();
+  NumberBaseResultModel toHexadecimal();
 }
 
 class NumberBaseType {
@@ -24,4 +26,7 @@ class NumberBaseResultModel {
   final String step;
 
   const NumberBaseResultModel({required this.result, required this.step});
+
+  const NumberBaseResultModel.noStep(String result)
+      : this(result: result, step: "#Tidak ada proses konversi#");
 }

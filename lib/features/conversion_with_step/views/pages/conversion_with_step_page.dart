@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:number_conversion/core/model/number_base/number_base.dart';
+import 'package:number_conversion/features/conversion_with_step/views/pages/step_page.dart';
 import 'package:number_conversion/features/custom_keyboard/views/widgets/custom_keyboard_widget.dart';
 import 'package:number_conversion/features/custom_keyboard/bloc/custom_keyboard_bloc.dart';
 
@@ -32,7 +33,7 @@ class ConversionWithStepPage extends StatelessWidget {
       body: Stack(
         children: [
           ImageFiltered(
-            imageFilter: ImageFilter.blur(sigmaX: 0, sigmaY: 0),
+            imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
             child: Image.asset(
               "assets/tv_tower.jpg",
               height: screenSize.height,
@@ -61,7 +62,20 @@ class ConversionWithStepPage extends StatelessWidget {
                   width: screenSize.width,
                   margin: EdgeInsets.symmetric(horizontal: 10),
                   child: FilledButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Hexadecimal hexadecimal = Hexadecimal("2E43C6");
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => StepPage(
+                            hexadecimal.toHexadecimal(),
+                            fromValue: hexadecimal.value.toString(),
+                            from: hexadecimal.base,
+                            to: NumberBaseType.hexadecimal,
+                          ),
+                        ),
+                      );
+                    },
                     style: FilledButton.styleFrom(
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
