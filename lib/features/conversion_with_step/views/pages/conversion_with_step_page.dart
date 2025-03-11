@@ -69,9 +69,6 @@ class ConversionWithStepPage extends StatelessWidget {
                         MaterialPageRoute(
                           builder: (context) => StepPage(
                             hexadecimal.toHexadecimal(),
-                            fromValue: hexadecimal.value.toString(),
-                            from: hexadecimal.base,
-                            to: NumberBaseType.hexadecimal,
                           ),
                         ),
                       );

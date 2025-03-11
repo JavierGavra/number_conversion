@@ -22,11 +22,30 @@ class NumberBaseType {
 }
 
 class NumberBaseResultModel {
+  final String initialValue;
+  final int fromBase;
+  final int toBase;
   final String result;
   final String step;
 
-  const NumberBaseResultModel({required this.result, required this.step});
+  const NumberBaseResultModel({
+    required this.initialValue,
+    required this.fromBase,
+    required this.toBase,
+    required this.result,
+    required this.step,
+  });
 
-  const NumberBaseResultModel.noStep(String result)
-      : this(result: result, step: "#Tidak ada proses konversi#");
+  const NumberBaseResultModel.noStep({
+    required String initialValue,
+    required int fromBase,
+    required int toBase,
+    required String result,
+  }) : this(
+          initialValue: initialValue,
+          fromBase: fromBase,
+          toBase: toBase,
+          result: result,
+          step: "#Tidak ada proses konversi#",
+        );
 }

@@ -63,6 +63,9 @@ final class Hexadecimal implements NumberBaseCovert {
     }
 
     return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.binary,
       result: result == "0000" ? "0" : result.replaceFirst(RegExp(r'^0+'), ''),
       step: step,
     );
@@ -100,7 +103,13 @@ final class Hexadecimal implements NumberBaseCovert {
 
     step += "#Gabungkan hasil konversi dari atas#";
 
-    return NumberBaseResultModel(result: result, step: step);
+    return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.octal,
+      result: result,
+      step: step,
+    );
   }
 
   @override
@@ -128,9 +137,20 @@ final class Hexadecimal implements NumberBaseCovert {
 
     step += "#Jumlahkan semua hasil#";
 
-    return NumberBaseResultModel(result: result.toString(), step: step);
+    return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.decimal,
+      result: result.toString(),
+      step: step,
+    );
   }
 
   @override
-  NumberBaseResultModel toHexadecimal() => NumberBaseResultModel.noStep(value);
+  NumberBaseResultModel toHexadecimal() => NumberBaseResultModel.noStep(
+        initialValue: value,
+        fromBase: base,
+        toBase: NumberBaseType.hexadecimal,
+        result: value,
+      );
 }

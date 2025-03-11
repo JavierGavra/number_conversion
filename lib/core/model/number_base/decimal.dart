@@ -10,7 +10,7 @@ final class Decimal implements NumberBaseCovert {
     int value = this.value;
     String result = "";
     String step =
-        "#Lakukan pembagian dengan basis angka yang diinginkan lalu ambil sisa pembagian#\n";
+        "#Lakukan pembagian dengan basis angka yang dituju lalu ambil sisa pembagian#\n";
     int remainder;
 
     do {
@@ -34,6 +34,9 @@ final class Decimal implements NumberBaseCovert {
     step += "#Urutkan dari bawah#";
 
     return NumberBaseResultModel(
+      initialValue: this.value.toString(),
+      fromBase: this.base,
+      toBase: base,
       result: result.reverse(),
       step: step,
     );
@@ -46,8 +49,12 @@ final class Decimal implements NumberBaseCovert {
   NumberBaseResultModel toOctal() => _convertByBase(NumberBaseType.octal);
 
   @override
-  NumberBaseResultModel toDecimal() =>
-      NumberBaseResultModel.noStep(value.toString());
+  NumberBaseResultModel toDecimal() => NumberBaseResultModel.noStep(
+        initialValue: value.toString(),
+        fromBase: base,
+        toBase: NumberBaseType.decimal,
+        result: value.toString(),
+      );
 
   @override
   NumberBaseResultModel toHexadecimal() =>

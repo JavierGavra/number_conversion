@@ -55,14 +55,21 @@ final class Octal implements NumberBaseCovert {
     }
 
     return NumberBaseResultModel(
+      initialValue: value.toString(),
+      fromBase: base,
+      toBase: NumberBaseType.binary,
       result: result == "000" ? "0" : result.replaceFirst(RegExp(r'^0+'), ''),
       step: step,
     );
   }
 
   @override
-  NumberBaseResultModel toOctal() =>
-      NumberBaseResultModel.noStep(value.toString());
+  NumberBaseResultModel toOctal() => NumberBaseResultModel.noStep(
+        initialValue: value.toString(),
+        fromBase: base,
+        toBase: NumberBaseType.octal,
+        result: value.toString(),
+      );
 
   @override
   NumberBaseResultModel toDecimal() {
@@ -82,7 +89,13 @@ final class Octal implements NumberBaseCovert {
 
     step += "#Jumlahkan semua hasil#";
 
-    return NumberBaseResultModel(result: result.toString(), step: step);
+    return NumberBaseResultModel(
+      initialValue: value.toString(),
+      fromBase: base,
+      toBase: NumberBaseType.decimal,
+      result: result.toString(),
+      step: step,
+    );
   }
 
   @override
@@ -126,6 +139,12 @@ final class Octal implements NumberBaseCovert {
 
     step += "#Gabungkan hasil konversi dari atas#";
 
-    return NumberBaseResultModel(result: result, step: step);
+    return NumberBaseResultModel(
+      initialValue: value.toString(),
+      fromBase: base,
+      toBase: NumberBaseType.hexadecimal,
+      result: result,
+      step: step,
+    );
   }
 }

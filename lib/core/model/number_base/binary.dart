@@ -23,14 +23,21 @@ final class Binary implements NumberBaseCovert {
     step += "#Jumlahkan semua hasil#";
 
     return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.decimal,
       result: result.toString(),
       step: step,
     );
   }
 
   @override
-  NumberBaseResultModel toBinary() =>
-      NumberBaseResultModel.noStep(value.toString());
+  NumberBaseResultModel toBinary() => NumberBaseResultModel.noStep(
+        initialValue: value,
+        fromBase: base,
+        toBase: NumberBaseType.binary,
+        result: value,
+      );
 
   @override
   NumberBaseResultModel toOctal() {
@@ -61,7 +68,13 @@ final class Binary implements NumberBaseCovert {
 
     step += "#Gabungkan hasil konversi dari atas#";
 
-    return NumberBaseResultModel(result: result, step: step);
+    return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.octal,
+      result: result,
+      step: step,
+    );
   }
 
   @override
@@ -105,6 +118,12 @@ final class Binary implements NumberBaseCovert {
 
     step += "#Gabungkan hasil konversi dari atas#";
 
-    return NumberBaseResultModel(result: result, step: step);
+    return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.hexadecimal,
+      result: result,
+      step: step,
+    );
   }
 }

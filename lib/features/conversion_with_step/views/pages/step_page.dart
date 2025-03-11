@@ -5,18 +5,9 @@ import 'package:number_conversion/core/model/number_base/number_base.dart';
 import 'package:number_conversion/core/utils/format_text.dart';
 
 class StepPage extends StatelessWidget {
-  final String fromValue;
-  final int from;
-  final int to;
   final NumberBaseResultModel model;
 
-  const StepPage(
-    this.model, {
-    super.key,
-    required this.from,
-    required this.to,
-    required this.fromValue,
-  });
+  const StepPage(this.model, {super.key});
 
   List<Widget> _formatStep(ColorScheme color, String text) {
     List<Widget> widgets = [];
@@ -94,7 +85,7 @@ class StepPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(color),
-                  _buildStepContent(color, "\n$fromValue\n", true),
+                  _buildStepContent(color, "\n${model.initialValue}\n", true),
                   ..._formatStep(color, model.step),
                   _buildResult(color),
                   SizedBox(height: 30),
@@ -115,7 +106,7 @@ class StepPage extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(
-            _formatNumberBase(from),
+            _formatNumberBase(model.fromBase),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w500,
@@ -126,7 +117,7 @@ class StepPage extends StatelessWidget {
           Icon(Icons.arrow_right_alt_rounded, color: color.primaryContainer),
           SizedBox(width: 5),
           Text(
-            _formatNumberBase(to),
+            _formatNumberBase(model.toBase),
             style: TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w500,
@@ -141,13 +132,13 @@ class StepPage extends StatelessWidget {
   Widget _buildResult(ColorScheme color) {
     String formatResult = "";
 
-    if (to == NumberBaseType.binary) {
+    if (model.toBase == NumberBaseType.binary) {
       formatResult = formatBinary(model.result);
-    } else if (to == NumberBaseType.decimal) {
+    } else if (model.toBase == NumberBaseType.decimal) {
       formatResult = formatDecimal(model.result);
-    } else if (to == NumberBaseType.octal) {
+    } else if (model.toBase == NumberBaseType.octal) {
       formatResult = formatOctal(model.result);
-    } else if (to == NumberBaseType.hexadecimal) {
+    } else if (model.toBase == NumberBaseType.hexadecimal) {
       formatResult = formatHexadecimal(model.result);
     }
 
