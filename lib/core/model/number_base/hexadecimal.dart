@@ -43,36 +43,61 @@ final class Hexadecimal implements NumberBaseCovert {
 
   @override
   String toBinary() {
-    if (value == "0") return "0";
+    String hexadecimal = value;
     String result = "";
-    for (int i = 0; i < value.length; i++) {
-      result += _decimalToBinary(_hexCharToDecimal(value[i])).padLeft(4, '0');
+    List<String> listOf4Bits = [];
+
+    for (int i = 0; i < hexadecimal.length; i++) {
+      int decimal = _hexCharToDecimal(hexadecimal[i]);
+      listOf4Bits.add(_decimalToBinary(decimal).padLeft(4, "0"));
     }
-    return result.replaceFirst(RegExp(r'^0+'), '');
+
+    for (var element in listOf4Bits) {
+      result += element;
+    }
+
+    return result == "0000" ? "0" : result.replaceFirst(RegExp(r'^0+'), '');
   }
 
   @override
   String toOctal() {
     String binary = toBinary();
-    if (binary == "0") return "0";
-    while (binary.length % 3 != 0) {
-      binary = '0$binary';
+    String result = "";
+    List<String> listOf3bits = [];
+
+    for (int i = binary.length; i > 0; i -= 3) {
+      if (i < 3) {
+        listOf3bits.add(binary.substring(0, i).padLeft(3, "0"));
+        continue;
+      }
+
+      listOf3bits.add(binary.substring(i - 3, i));
+    }
+    listOf3bits = listOf3bits.reversed.toList();
+
+    for (int i = 0; i < listOf3bits.length; i++) {
+      int decimal = _binaryToDecimal(listOf3bits[i]);
+      result += decimal.toString();
     }
 
-    String result = "";
-    for (int i = 0; i < binary.length; i += 3) {
-      result += _binaryToDecimal(binary.substring(i, i + 3)).toString();
-    }
     return result;
   }
 
   @override
   String toDecimal() {
+    String hexadecimal = value;
     int result = 0;
-    int baseMultiplier = 1;
-    for (int i = value.length - 1; i >= 0; i--) {
-      result += _hexCharToDecimal(value[i]) * baseMultiplier;
-      baseMultiplier *= base;
+    int i = 0;
+    List<int> listOfDecimal = [];
+
+    for (int j = 0; j < hexadecimal.length; j++) {
+      listOfDecimal.add(_hexCharToDecimal(hexadecimal[j]));
+    }
+
+    for (int j = hexadecimal.length - 1; j >= 0; j--) {
+      num resultPerDecimal = listOfDecimal[j] * pow(16, i);
+      result += resultPerDecimal.toInt();
+      i++;
     }
     return result.toString();
   }

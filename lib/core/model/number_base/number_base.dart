@@ -1,4 +1,6 @@
-import '../../extension/string_extension.dart';
+import 'dart:math';
+
+import 'package:number_conversion/core/extension/string_extension.dart';
 
 part 'decimal.dart';
 part 'binary.dart';
@@ -13,15 +15,8 @@ abstract interface class NumberBaseCovert {
 }
 
 class NumberBaseType {
-  static const int binary = 2;
-  static const int octal = 8;
-  static const int decimal = 10;
-  static const int hexadecimal = 16;
-}
-
-class NumberBaseResultModel {
-  final String result;
-  final String step;
-
-  const NumberBaseResultModel({required this.result, required this.step});
+  static const binary = 2;
+  static const octal = 8;
+  static const decimal = 10;
+  static const hexadecimal = 16;
 }
