@@ -75,7 +75,7 @@ final class Octal implements NumberBaseCovert {
   NumberBaseResultModel toDecimal() {
     String octal = value.toString();
     int result = 0;
-    String step = "#Hitung dari belakang agar mudah#\n";
+    String step = "#Hitung dari kanan agar mudah#\n";
     int i = 0;
 
     for (int j = octal.length - 1; j >= 0; j--) {

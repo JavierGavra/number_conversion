@@ -124,7 +124,9 @@ final class Hexadecimal implements NumberBaseCovert {
       listOfDecimal.add(_hexCharToDecimal(hexadecimal[j]));
       step += "${hexadecimal[j]} = ${listOfDecimal[j]}\n";
     }
-    step += "#Lalu hitung dari belakang agar mudah#\n";
+
+    step += "\n$listOfDecimal\n";
+    step += "#Lalu hitung dari kanan agar mudah#\n";
 
     for (int j = hexadecimal.length - 1; j >= 0; j--) {
       num resultPerDecimal = listOfDecimal[j] * pow(16, i);

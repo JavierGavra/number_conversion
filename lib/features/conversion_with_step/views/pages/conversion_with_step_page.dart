@@ -3,9 +3,11 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:number_conversion/core/model/number_base/number_base.dart';
+import 'package:number_conversion/features/conversion_with_step/bloc/conversion_with_step_bloc.dart';
 import 'package:number_conversion/features/conversion_with_step/views/pages/step_page.dart';
 import 'package:number_conversion/features/custom_keyboard/views/widgets/custom_keyboard_widget.dart';
 import 'package:number_conversion/features/custom_keyboard/bloc/custom_keyboard_bloc.dart';
+import 'package:page_transition/page_transition.dart';
 
 class ConversionWithStepPage extends StatefulWidget {
   const ConversionWithStepPage({super.key});
@@ -27,6 +29,33 @@ class _ConversionWithStepPageState extends State<ConversionWithStepPage> {
       child: Text("Hexadecimal"),
     ),
   ];
+
+  void _customKeyboardListener(
+    BuildContext context,
+    CustomKeyboardState state,
+  ) {
+    context.read<ConversionWithStepBloc>().add(ConversionEvent(
+          fromBase: _fromBase.value,
+          toBase: _toBase.value,
+          value: state.text,
+        ));
+  }
+
+  void _fromBaseOnChanged(int? value) {
+    if (value == _fromBase.value) return;
+
+    context.read<CustomKeyboardBloc>().add(ClearEvent(relpaceWith: "0"));
+    _fromBase.value = value!;
+  }
+
+  void _toBaseOnChanged({String? text, int? value}) {
+    _toBase.value = value!;
+    context.read<ConversionWithStepBloc>().add(ConversionEvent(
+          fromBase: _fromBase.value,
+          toBase: _toBase.value,
+          value: text!,
+        ));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,82 +96,29 @@ class _ConversionWithStepPageState extends State<ConversionWithStepPage> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                BlocBuilder<CustomKeyboardBloc, CustomKeyboardState>(
-                  builder: (context, state) {
-                    return Text(
-                      state.text,
-                      style: TextStyle(color: Colors.white),
-                    );
-                  },
-                ),
-                Container(
-                  height: 60,
-                  width: screenSize.width,
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: color.secondary.withValues(alpha: 0.2),
-                    border: Border.all(color: color.surface),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-                SizedBox(height: 15),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 10),
-                  child: Row(
-                    spacing: 10,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _buildDropdownButton(
-                        context: context,
-                        label: "Dari :",
-                        valueNotfier: _fromBase,
-                      ),
-                      Icon(
-                        Icons.arrow_right_alt_rounded,
-                        color: color.primaryContainer,
-                      ),
-                      _buildDropdownButton(
-                        context: context,
-                        label: "Ke :",
-                        valueNotfier: _toBase,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 15),
-                Container(
-                  height: 60,
-                  width: screenSize.width,
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  decoration: BoxDecoration(
-                    color: color.primary.withValues(alpha: 1),
-                    borderRadius: BorderRadius.circular(5),
-                  ),
-                ),
-                SizedBox(height: 50),
-                Spacer(),
-                Container(
-                  width: screenSize.width,
-                  margin: EdgeInsets.symmetric(horizontal: 10),
-                  child: FilledButton(
-                    onPressed: () {
-                      print("${_fromBase.value} -> ${_toBase.value}");
-                      Hexadecimal hexadecimal = Hexadecimal("2E43C6");
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => StepPage(
-                            hexadecimal.toHexadecimal(),
-                          ),
-                        ),
-                      );
-                    },
-                    style: FilledButton.styleFrom(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                SizedBox(height: 20),
+                Expanded(
+                  child: BlocListener<CustomKeyboardBloc, CustomKeyboardState>(
+                    listener: _customKeyboardListener,
+                    child: BlocBuilder<ConversionWithStepBloc,
+                        ConversionWithStepState>(
+                      builder: (context, state) {
+                        return Column(
+                          children: [
+                            _buildInputSegmen(context, state.from),
+                            SizedBox(height: 15),
+                            _buildConvertOptionSegmen(context, state.from),
+                            SizedBox(height: 5),
+                            Divider(indent: 10, endIndent: 10),
+                            SizedBox(height: 5),
+                            _buildResultSegmen(context, state.resultFormatted),
+                            SizedBox(height: 50),
+                            Spacer(),
+                            _buildSeeStepButton(state.model),
+                          ],
+                        );
+                      },
                     ),
-                    child: Text("Lihat Langkah Penyelesaian"),
                   ),
                 ),
                 SizedBox(height: 5),
@@ -152,8 +128,11 @@ class _ConversionWithStepPageState extends State<ConversionWithStepPage> {
                 ),
                 ColoredBox(
                   color: color.surfaceContainerHighest.withValues(alpha: 0.4),
-                  child: CustomKeyboardWidget(
-                    numberBaseType: NumberBaseType.decimal,
+                  child: ValueListenableBuilder(
+                    valueListenable: _fromBase,
+                    builder: (context, value, child) {
+                      return CustomKeyboardWidget(numberBaseType: value);
+                    },
                   ),
                 ),
               ],
@@ -167,11 +146,12 @@ class _ConversionWithStepPageState extends State<ConversionWithStepPage> {
   Widget _buildDropdownButton({
     required BuildContext context,
     required String label,
-    required ValueNotifier valueNotfier,
+    required ValueNotifier valueNotifier,
+    required Function(int?)? onChanged,
   }) {
     final ColorScheme color = Theme.of(context).colorScheme;
     return ValueListenableBuilder(
-      valueListenable: valueNotfier,
+      valueListenable: valueNotifier,
       builder: (context, value, child) {
         return Expanded(
           child: DropdownButtonFormField<int>(
@@ -191,11 +171,103 @@ class _ConversionWithStepPageState extends State<ConversionWithStepPage> {
                 borderSide: BorderSide(color: color.surface),
               ),
             ),
-            onChanged: (value) => valueNotfier.value = value,
+            onChanged: onChanged,
             items: _numberBaseMenus,
           ),
         );
       },
+    );
+  }
+
+  Widget _buildInputSegmen(BuildContext context, String text) {
+    final ColorScheme color = Theme.of(context).colorScheme;
+    final Size screenSize = MediaQuery.sizeOf(context);
+    return Container(
+      height: 60,
+      width: screenSize.width,
+      alignment: Alignment.centerLeft,
+      margin: EdgeInsets.symmetric(horizontal: 10),
+      padding: EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: color.secondary.withValues(alpha: 0.2),
+        border: Border.all(color: color.surface),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Text(text, style: TextStyle(color: color.onPrimary)),
+    );
+  }
+
+  Widget _buildConvertOptionSegmen(BuildContext context, String text) {
+    final ColorScheme color = Theme.of(context).colorScheme;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 10),
+      child: Row(
+        spacing: 10,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildDropdownButton(
+            context: context,
+            label: "Dari :",
+            valueNotifier: _fromBase,
+            onChanged: _fromBaseOnChanged,
+          ),
+          Icon(Icons.arrow_right_alt_rounded, color: color.primaryContainer),
+          _buildDropdownButton(
+            context: context,
+            label: "Ke :",
+            valueNotifier: _toBase,
+            onChanged: (value) => _toBaseOnChanged(text: text, value: value),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildResultSegmen(BuildContext context, String text) {
+    final ColorScheme color = Theme.of(context).colorScheme;
+    final Size screenSize = MediaQuery.sizeOf(context);
+    return Container(
+      height: 60,
+      width: screenSize.width,
+      margin: EdgeInsets.symmetric(horizontal: 10),
+      padding: EdgeInsets.symmetric(horizontal: 12),
+      alignment: Alignment.centerLeft,
+      decoration: BoxDecoration(
+        color: color.primaryContainer.withValues(alpha: 0.7),
+        borderRadius: BorderRadius.circular(5),
+      ),
+      child: Text(
+        text,
+        style: TextStyle(
+          color: color.onPrimaryContainer,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSeeStepButton(NumberBaseResultModel model) {
+    final Size screenSize = MediaQuery.sizeOf(context);
+    return Container(
+      width: screenSize.width,
+      margin: EdgeInsets.symmetric(horizontal: 10),
+      child: FilledButton(
+        onPressed: () {
+          print("${_fromBase.value} -> ${_toBase.value}");
+          context.pushTransition(
+            type: PageTransitionType.bottomToTop,
+            curve: Curves.easeInOutCirc,
+            duration: const Duration(milliseconds: 300),
+            child: StepPage(model),
+          );
+        },
+        style: FilledButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+        ),
+        child: Text("Lihat Langkah Penyelesaian"),
+      ),
     );
   }
 }

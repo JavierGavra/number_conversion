@@ -8,7 +8,7 @@ final class Binary implements NumberBaseCovert {
 
   NumberBaseResultModel _toDecimal(String value) {
     int result = 0;
-    String step = "#Hitung dari belakang agar mudah#\n";
+    String step = "#Hitung dari kanan agar mudah#\n";
     int i = 0;
 
     for (int j = value.length - 1; j >= 0; j--) {
