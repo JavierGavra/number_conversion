@@ -6,35 +6,57 @@ final class Decimal implements NumberBaseCovert {
 
   Decimal(this.value);
 
-  String _convertByBase(int base) {
+  NumberBaseResultModel _convertByBase(int base) {
     int value = this.value;
     String result = "";
+    String step =
+        "#Lakukan pembagian dengan basis angka yang dituju lalu ambil sisa pembagian#\n";
     int remainder;
 
     do {
       remainder = value % base;
+      step += "$value / $base = ";
+
       value ~/= base;
+      step += "$value, sisa $remainder";
 
       if (base == 16 && remainder > 9) {
         String letter = String.fromCharCode(remainder + 55);
         result += letter;
+        step += " -> $letter";
       } else {
         result += remainder.toString();
       }
+
+      step += "\n";
     } while (value != 0);
 
-    return result.reverse();
+    step += "#Urutkan dari bawah#";
+
+    return NumberBaseResultModel(
+      initialValue: this.value.toString(),
+      fromBase: this.base,
+      toBase: base,
+      result: result.reverse(),
+      step: step,
+    );
   }
 
   @override
-  String toBinary() => _convertByBase(NumberBaseType.binary);
+  NumberBaseResultModel toBinary() => _convertByBase(NumberBaseType.binary);
 
   @override
-  String toOctal() => _convertByBase(NumberBaseType.octal);
+  NumberBaseResultModel toOctal() => _convertByBase(NumberBaseType.octal);
 
   @override
-  String toDecimal() => value.toString();
+  NumberBaseResultModel toDecimal() => NumberBaseResultModel.noStep(
+        initialValue: value.toString(),
+        fromBase: base,
+        toBase: NumberBaseType.decimal,
+        result: value.toString(),
+      );
 
   @override
-  String toHexadecimal() => _convertByBase(NumberBaseType.hexadecimal);
+  NumberBaseResultModel toHexadecimal() =>
+      _convertByBase(NumberBaseType.hexadecimal);
 }

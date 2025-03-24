@@ -34,10 +34,10 @@ class RealTimeConversionBloc
 
     emit(RealTimeConversionState(
       from: event.from,
-      binary: numberBase.toBinary(),
-      decimal: numberBase.toDecimal(),
-      octal: numberBase.toOctal(),
-      hexadecimal: numberBase.toHexadecimal(),
+      binary: numberBase.toBinary().result,
+      decimal: numberBase.toDecimal().result,
+      octal: numberBase.toOctal().result,
+      hexadecimal: numberBase.toHexadecimal().result,
     ));
   }
 }

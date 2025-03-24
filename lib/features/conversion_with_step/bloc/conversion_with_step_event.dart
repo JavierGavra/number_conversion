@@ -4,9 +4,20 @@ sealed class ConversionWithStepEvent extends Equatable {
   const ConversionWithStepEvent();
 
   @override
-  List<Object> get props => [];
+  List<Object?> get props => [];
 }
 
-class IncrementEvent extends ConversionWithStepEvent {}
+class ConversionEvent extends ConversionWithStepEvent {
+  final int fromBase;
+  final int toBase;
+  final String value;
 
-class DecrementEvent extends ConversionWithStepEvent {}
+  const ConversionEvent({
+    required this.fromBase,
+    required this.toBase,
+    required this.value,
+  });
+
+  @override
+  List<Object?> get props => [fromBase, toBase, value];
+}

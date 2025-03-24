@@ -42,66 +42,117 @@ final class Hexadecimal implements NumberBaseCovert {
   }
 
   @override
-  String toBinary() {
+  NumberBaseResultModel toBinary() {
     String hexadecimal = value;
+    String step = "#Ubah setiap elemen menjadi binary 4 bit#\n";
     String result = "";
     List<String> listOf4Bits = [];
 
     for (int i = 0; i < hexadecimal.length; i++) {
       int decimal = _hexCharToDecimal(hexadecimal[i]);
       listOf4Bits.add(_decimalToBinary(decimal).padLeft(4, "0"));
+
+      step += "${hexadecimal[i]} = ${listOf4Bits[i]}\n";
     }
+
+    step += "\n$listOf4Bits\n";
+    step += "#Lalu gabungkan masing-masing binary 4 bit menjadi 1 binary#";
 
     for (var element in listOf4Bits) {
       result += element;
     }
 
-    return result == "0000" ? "0" : result.replaceFirst(RegExp(r'^0+'), '');
+    return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.binary,
+      result: result == "0000" ? "0" : result.replaceFirst(RegExp(r'^0+'), ''),
+      step: step,
+    );
   }
 
   @override
-  String toOctal() {
-    String binary = toBinary();
+  NumberBaseResultModel toOctal() {
+    NumberBaseResultModel binary = toBinary();
+    String step = binary.step;
     String result = "";
+
+    step += "\n${binary.result}\n";
+    step += "#Lalu pisahkan binary menjadi 3 bit dari belakang#\n";
     List<String> listOf3bits = [];
 
-    for (int i = binary.length; i > 0; i -= 3) {
+    for (int i = binary.result.length; i > 0; i -= 3) {
       if (i < 3) {
-        listOf3bits.add(binary.substring(0, i).padLeft(3, "0"));
+        listOf3bits.add(binary.result.substring(0, i).padLeft(3, "0"));
         continue;
       }
 
-      listOf3bits.add(binary.substring(i - 3, i));
+      listOf3bits.add(binary.result.substring(i - 3, i));
     }
     listOf3bits = listOf3bits.reversed.toList();
+
+    step += "$listOf3bits\n";
+    step += "#Lalu ubah masing-masing 3 bit menjadi octal#\n";
 
     for (int i = 0; i < listOf3bits.length; i++) {
       int decimal = _binaryToDecimal(listOf3bits[i]);
       result += decimal.toString();
+
+      step += "${listOf3bits[i]} = $decimal\n";
     }
 
-    return result;
+    step += "#Gabungkan hasil konversi dari atas#";
+
+    return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.octal,
+      result: result,
+      step: step,
+    );
   }
 
   @override
-  String toDecimal() {
+  NumberBaseResultModel toDecimal() {
     String hexadecimal = value;
     int result = 0;
+    String step = "#Konversi masing-masing hexadecimal menjadi decimal#\n";
     int i = 0;
     List<int> listOfDecimal = [];
 
     for (int j = 0; j < hexadecimal.length; j++) {
       listOfDecimal.add(_hexCharToDecimal(hexadecimal[j]));
+      step += "${hexadecimal[j]} = ${listOfDecimal[j]}\n";
     }
+
+    step += "\n$listOfDecimal\n";
+    step += "#Lalu hitung dari kanan agar mudah#\n";
 
     for (int j = hexadecimal.length - 1; j >= 0; j--) {
       num resultPerDecimal = listOfDecimal[j] * pow(16, i);
       result += resultPerDecimal.toInt();
+
+      step += "${listOfDecimal[j]} * (16^$i) = $resultPerDecimal\n";
+
       i++;
     }
-    return result.toString();
+
+    step += "#Jumlahkan semua hasil#";
+
+    return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.decimal,
+      result: result.toString(),
+      step: step,
+    );
   }
 
   @override
-  String toHexadecimal() => value;
+  NumberBaseResultModel toHexadecimal() => NumberBaseResultModel.noStep(
+        initialValue: value,
+        fromBase: base,
+        toBase: NumberBaseType.hexadecimal,
+        result: value,
+      );
 }

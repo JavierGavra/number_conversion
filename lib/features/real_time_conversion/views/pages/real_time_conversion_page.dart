@@ -32,114 +32,91 @@ class _RealTimeConversionPageState extends State<RealTimeConversionPage> {
     final Size screenSize = MediaQuery.sizeOf(context);
     final ColorScheme color = Theme.of(context).colorScheme;
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text("Konversi Real Time"),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        leading: Builder(
-          builder: (context) {
-            return IconButton(
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    behavior: SnackBarBehavior.floating,
-                    content: Text("Comming soon..."),
+    return Stack(
+      children: [
+        ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Image.asset(
+            "assets/lighthouse.jpg",
+            height: screenSize.height,
+            fit: BoxFit.cover,
+          ),
+        ),
+        Container(
+          width: screenSize.width,
+          height: screenSize.height,
+          color: Colors.black.withValues(alpha: 0.15),
+        ),
+        ValueListenableBuilder(
+          valueListenable: _selectedNumberBase,
+          builder: (context, selectedNumberBase, child) {
+            return SafeArea(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  BlocListener<CustomKeyboardBloc, CustomKeyboardState>(
+                    listener: _customKeyboardListener,
+                    child: BlocBuilder<RealTimeConversionBloc,
+                        RealTimeConversionState>(
+                      builder: (context, state) {
+                        return Expanded(
+                          child: SingleChildScrollView(
+                            child: Column(
+                              spacing: 10,
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(height: 30),
+                                _buildTextField(
+                                  context,
+                                  label: "HEX",
+                                  value: state.hexadecimal,
+                                  numberBaseType: NumberBaseType.hexadecimal,
+                                ),
+                                _buildTextField(
+                                  context,
+                                  label: "DEC",
+                                  value: state.decimal,
+                                  numberBaseType: NumberBaseType.decimal,
+                                ),
+                                _buildTextField(
+                                  context,
+                                  label: "OCT",
+                                  value: state.octal,
+                                  numberBaseType: NumberBaseType.octal,
+                                ),
+                                _buildTextField(
+                                  context,
+                                  label: "BIN",
+                                  value: state.binary,
+                                  numberBaseType: NumberBaseType.binary,
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                );
-              },
-              icon: Icon(Icons.menu),
+                  // Spacer(),
+                  Container(
+                    height: 10,
+                    color: color.primary.withValues(alpha: 0.3),
+                  ),
+                  ColoredBox(
+                    color: color.surfaceContainerHighest.withValues(
+                      alpha: 0.4,
+                    ),
+                    child: CustomKeyboardWidget(
+                      numberBaseType: selectedNumberBase,
+                    ),
+                  ),
+                ],
+              ),
             );
           },
-        ),
-      ),
-      body: Stack(
-        children: [
-          ImageFiltered(
-            imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-            child: Image.asset(
-              "assets/lighthouse.jpg",
-              height: screenSize.height,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Container(
-            width: screenSize.width,
-            height: screenSize.height,
-            color: Colors.black.withValues(alpha: 0.15),
-          ),
-          ValueListenableBuilder(
-            valueListenable: _selectedNumberBase,
-            builder: (context, selectedNumberBase, child) {
-              return SafeArea(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    BlocListener<CustomKeyboardBloc, CustomKeyboardState>(
-                      listener: _customKeyboardListener,
-                      child: BlocBuilder<RealTimeConversionBloc,
-                          RealTimeConversionState>(
-                        builder: (context, state) {
-                          return Expanded(
-                            child: SingleChildScrollView(
-                              child: Column(
-                                spacing: 10,
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(height: 30),
-                                  _buildTextField(
-                                    context,
-                                    label: "HEX",
-                                    value: state.hexadecimal,
-                                    numberBaseType: NumberBaseType.hexadecimal,
-                                  ),
-                                  _buildTextField(
-                                    context,
-                                    label: "DEC",
-                                    value: state.decimal,
-                                    numberBaseType: NumberBaseType.decimal,
-                                  ),
-                                  _buildTextField(
-                                    context,
-                                    label: "OCT",
-                                    value: state.octal,
-                                    numberBaseType: NumberBaseType.octal,
-                                  ),
-                                  _buildTextField(
-                                    context,
-                                    label: "BIN",
-                                    value: state.binary,
-                                    numberBaseType: NumberBaseType.binary,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    ),
-                    // Spacer(),
-                    Container(
-                      height: 10,
-                      color: color.primary.withValues(alpha: 0.3),
-                    ),
-                    ColoredBox(
-                      color: color.surfaceContainerHighest.withValues(
-                        alpha: 0.4,
-                      ),
-                      child: CustomKeyboardWidget(
-                        numberBaseType: selectedNumberBase,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            },
-          )
-        ],
-      ),
+        )
+      ],
     );
   }
 

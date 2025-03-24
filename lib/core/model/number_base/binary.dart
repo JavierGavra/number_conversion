@@ -6,25 +6,43 @@ final class Binary implements NumberBaseCovert {
 
   Binary(this.value) : assert(!(value.toString().contains(RegExp(r'[2-9]'))));
 
-  int _toDecimal(String value) {
+  NumberBaseResultModel _toDecimal(String value) {
     int result = 0;
+    String step = "#Hitung dari kanan agar mudah#\n";
     int i = 0;
 
     for (int j = value.length - 1; j >= 0; j--) {
       num resultPerBit = int.parse(value[j]) * pow(2, i);
       result += resultPerBit.toInt();
+
+      step += "${value[j]} * (2^$i) = $resultPerBit\n";
+
       i++;
     }
 
-    return result;
+    step += "#Jumlahkan semua hasil#";
+
+    return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.decimal,
+      result: result.toString(),
+      step: step,
+    );
   }
 
   @override
-  String toBinary() => value;
+  NumberBaseResultModel toBinary() => NumberBaseResultModel.noStep(
+        initialValue: value,
+        fromBase: base,
+        toBase: NumberBaseType.binary,
+        result: value,
+      );
 
   @override
-  String toOctal() {
+  NumberBaseResultModel toOctal() {
     String binary = value.toString();
+    String step = "#Pisahkan binary menjadi 3 bit dari belakang#\n";
     List<String> listOf3bits = [];
     String result = "";
 
@@ -38,20 +56,34 @@ final class Binary implements NumberBaseCovert {
     }
     listOf3bits = listOf3bits.reversed.toList();
 
+    step += "$listOf3bits\n";
+    step += "#Lalu ubah masing-masing 3 bit menjadi octal#\n";
+
     for (int i = 0; i < listOf3bits.length; i++) {
-      int decimal = _toDecimal(listOf3bits[i]);
+      int decimal = int.parse(_toDecimal(listOf3bits[i]).result);
       result += decimal.toString();
+
+      step += "${listOf3bits[i]} = $decimal\n";
     }
 
-    return result;
+    step += "#Gabungkan hasil konversi dari atas#";
+
+    return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.octal,
+      result: result,
+      step: step,
+    );
   }
 
   @override
-  String toDecimal() => _toDecimal(value).toString();
+  NumberBaseResultModel toDecimal() => _toDecimal(value);
 
   @override
-  String toHexadecimal() {
+  NumberBaseResultModel toHexadecimal() {
     String binary = value.toString();
+    String step = "#Pisahkan binary menjadi 4 bit dari belakang#\n";
     List<String> listOf4bits = [];
     String result = "";
 
@@ -65,17 +97,33 @@ final class Binary implements NumberBaseCovert {
     }
     listOf4bits = listOf4bits.reversed.toList();
 
+    step += "$listOf4bits\n";
+    step += "#Lalu ubah masing-masing 4 bit menjadi hexadecimal#\n";
+
     for (int i = 0; i < listOf4bits.length; i++) {
-      int decimal = _toDecimal(listOf4bits[i]);
+      int decimal = int.parse(_toDecimal(listOf4bits[i]).result);
+
+      step += "${listOf4bits[i]} = $decimal";
 
       if (decimal > 9) {
         String letter = String.fromCharCode(decimal + 55);
         result += letter;
+        step += " -> $letter";
       } else {
         result += decimal.toString();
       }
+
+      step += "\n";
     }
 
-    return result;
+    step += "#Gabungkan hasil konversi dari atas#";
+
+    return NumberBaseResultModel(
+      initialValue: value,
+      fromBase: base,
+      toBase: NumberBaseType.hexadecimal,
+      result: result,
+      step: step,
+    );
   }
 }
