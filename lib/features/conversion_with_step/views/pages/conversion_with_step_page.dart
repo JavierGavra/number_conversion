@@ -62,84 +62,68 @@ class _ConversionWithStepPageState extends State<ConversionWithStepPage> {
     final ColorScheme color = Theme.of(context).colorScheme;
     final Size screenSize = MediaQuery.sizeOf(context);
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: const Text("Konversi Dengan Langkah"),
-        backgroundColor: Colors.transparent,
-        foregroundColor: Colors.white,
-        leading: Builder(
-          builder: (context) {
-            return IconButton(
-              onPressed: () => Scaffold.of(context).openDrawer(),
-              icon: Icon(Icons.menu),
-            );
-          },
-        ),
-      ),
-      body: Stack(
-        children: [
-          ImageFiltered(
-            imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-            child: Image.asset(
-              "assets/tv_tower.jpg",
-              height: screenSize.height,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Container(
-            width: screenSize.width,
+    return Stack(
+      children: [
+        ImageFiltered(
+          imageFilter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
+          child: Image.asset(
+            "assets/tv_tower.jpg",
             height: screenSize.height,
-            color: Colors.black.withValues(alpha: 0.15),
+            fit: BoxFit.cover,
           ),
-          SafeArea(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(height: 20),
-                Expanded(
-                  child: BlocListener<CustomKeyboardBloc, CustomKeyboardState>(
-                    listener: _customKeyboardListener,
-                    child: BlocBuilder<ConversionWithStepBloc,
-                        ConversionWithStepState>(
-                      builder: (context, state) {
-                        return Column(
-                          children: [
-                            _buildInputSegmen(context, state.from),
-                            SizedBox(height: 15),
-                            _buildConvertOptionSegmen(context, state.from),
-                            SizedBox(height: 5),
-                            Divider(indent: 10, endIndent: 10),
-                            SizedBox(height: 5),
-                            _buildResultSegmen(context, state.resultFormatted),
-                            SizedBox(height: 50),
-                            Spacer(),
-                            _buildSeeStepButton(state.model),
-                          ],
-                        );
-                      },
-                    ),
-                  ),
-                ),
-                SizedBox(height: 5),
-                Container(
-                  height: 10,
-                  color: color.primary.withValues(alpha: 0.3),
-                ),
-                ColoredBox(
-                  color: color.surfaceContainerHighest.withValues(alpha: 0.4),
-                  child: ValueListenableBuilder(
-                    valueListenable: _fromBase,
-                    builder: (context, value, child) {
-                      return CustomKeyboardWidget(numberBaseType: value);
+        ),
+        Container(
+          width: screenSize.width,
+          height: screenSize.height,
+          color: Colors.black.withValues(alpha: 0.15),
+        ),
+        SafeArea(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              SizedBox(height: 20),
+              Expanded(
+                child: BlocListener<CustomKeyboardBloc, CustomKeyboardState>(
+                  listener: _customKeyboardListener,
+                  child: BlocBuilder<ConversionWithStepBloc,
+                      ConversionWithStepState>(
+                    builder: (context, state) {
+                      return Column(
+                        children: [
+                          _buildInputSegmen(context, state.from),
+                          SizedBox(height: 15),
+                          _buildConvertOptionSegmen(context, state.from),
+                          SizedBox(height: 5),
+                          Divider(indent: 10, endIndent: 10),
+                          SizedBox(height: 5),
+                          _buildResultSegmen(context, state.resultFormatted),
+                          SizedBox(height: 50),
+                          Spacer(),
+                          _buildSeeStepButton(state.model),
+                        ],
+                      );
                     },
                   ),
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: 5),
+              Container(
+                height: 10,
+                color: color.primary.withValues(alpha: 0.3),
+              ),
+              ColoredBox(
+                color: color.surfaceContainerHighest.withValues(alpha: 0.4),
+                child: ValueListenableBuilder(
+                  valueListenable: _fromBase,
+                  builder: (context, value, child) {
+                    return CustomKeyboardWidget(numberBaseType: value);
+                  },
+                ),
+              ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 
