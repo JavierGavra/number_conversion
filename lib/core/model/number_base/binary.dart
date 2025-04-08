@@ -31,6 +31,21 @@ final class Binary implements NumberBaseCovert, NumberBaseArithmetic<Binary> {
     );
   }
 
+  int _compareBinary(String a, String b) {
+    a = a.replaceFirst(RegExp(r"^0+"), "");
+    b = b.replaceFirst(RegExp(r"^0+"), "");
+
+    if (a.length != b.length) {
+      return a.length.compareTo(b.length);
+    }
+
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return a[i].compareTo(b[i]);
+    }
+
+    return 0;
+  }
+
   @override
   NumberBaseConvertResultModel toBinary() =>
       NumberBaseConvertResultModel.noStep(
@@ -283,7 +298,65 @@ final class Binary implements NumberBaseCovert, NumberBaseArithmetic<Binary> {
 
   @override
   NumberBaseArithmeticResultModel division(Binary other) {
-    // TODO: implement /
-    throw UnimplementedError();
+    String dividend = value;
+    String divisor = other.value;
+    String quotient = "";
+    String step = "\n";
+
+    if (divisor.replaceAll("0", "") == "") {
+      return NumberBaseDivisionResultModel(
+        base: base,
+        operator: "/",
+        result: "Tidak bisa membagi dengan 0",
+        remainder: "0",
+        step: "#Tidak bisa membagi dengan 0#",
+      );
+    }
+
+    step += "Dividend: $dividend\n";
+    step += "Divisor : $divisor\n";
+    step += "#Menggunakan metode porogapit (Long Division)#\n";
+
+    String current = "";
+    int index = 0;
+
+    while (index < dividend.length) {
+      current += dividend[index];
+      current = current.replaceFirst(RegExp(r"^0+"), ""); // hapus nol di depan
+
+      if (current.isEmpty || _compareBinary(current, divisor) < 0) {
+        quotient += "0";
+        step +=
+            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
+            "→ $current < $divisor → Quotient: 0\n";
+      } else {
+        String subtracted = Binary(current).subtraction(Binary(divisor)).result;
+        step +=
+            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
+            "→ $current ≥ $divisor → Kurangkan: $current - $divisor = $subtracted → Quotient: 1\n";
+        quotient += "1";
+        current = subtracted;
+      }
+
+      index++;
+    }
+
+    quotient = quotient.replaceFirst(RegExp(r"^0+"), "");
+    if (quotient.isEmpty) quotient = "0";
+
+    step += "\nQuotient: $quotient";
+    if (current.isNotEmpty && current != "0") {
+      step += "\nSisa: $current";
+    }
+
+    step += "\n#Hasil Akhir#";
+
+    return NumberBaseDivisionResultModel(
+      base: base,
+      operator: "/",
+      result: quotient,
+      remainder: current,
+      step: step,
+    );
   }
 }

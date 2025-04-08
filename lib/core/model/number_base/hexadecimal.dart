@@ -325,7 +325,82 @@ final class Hexadecimal
 
   @override
   NumberBaseArithmeticResultModel division(Hexadecimal other) {
-    // TODO: implement division
-    throw UnimplementedError();
+    String dividend = value.toUpperCase();
+    String divisor = other.value.toUpperCase();
+    String quotient = "";
+    String step = "\n";
+
+    if (divisor.replaceAll("0", "") == "") {
+      return NumberBaseDivisionResultModel(
+        base: base,
+        operator: "/",
+        result: "Tidak bisa membagi dengan 0",
+        remainder: "0",
+        step: "#Tidak bisa membagi dengan 0#",
+      );
+    }
+
+    step += "Dividend: $dividend\n";
+    step += "Divisor : $divisor\n";
+    step += "#Menggunakan metode porogapit (Long Division)#\n";
+
+    String current = "";
+    int index = 0;
+
+    while (index < dividend.length) {
+      current += dividend[index];
+      current = current.replaceFirst(RegExp(r"^0+"), ""); // Hapus nol di depan
+
+      if (current.isEmpty) {
+        quotient += "0";
+        index++;
+        continue;
+      }
+
+      int currentVal = int.parse(current, radix: 16);
+      int divisorVal = int.parse(divisor, radix: 16);
+
+      if (currentVal < divisorVal) {
+        quotient += "0";
+        step +=
+            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
+            "→ $current < $divisor → Quotient: 0\n";
+      } else {
+        int q = currentVal ~/ divisorVal;
+        int mul = q * divisorVal;
+        int remainder = currentVal - mul;
+
+        String subtracted = remainder.toRadixString(16).toUpperCase();
+        quotient += q.toRadixString(16).toUpperCase();
+
+        step +=
+            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
+            "→ $current ≥ $divisor → Kurangkan: $current - $divisor = $subtracted "
+            "→ Quotient: ${q.toRadixString(16).toUpperCase()}\n";
+
+        current = subtracted;
+      }
+
+      index++;
+    }
+
+    // Hapus leading zero dari hasil
+    quotient = quotient.replaceFirst(RegExp(r"^0+"), "");
+    if (quotient.isEmpty) quotient = "0";
+
+    step += "\nQuotient: $quotient";
+    if (current.isNotEmpty && current != "0") {
+      step += "\nSisa: $current";
+    }
+
+    step += "\n#Hasil Akhir#";
+
+    return NumberBaseDivisionResultModel(
+      base: base,
+      operator: "/",
+      result: quotient,
+      remainder: current,
+      step: step,
+    );
   }
 }

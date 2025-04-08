@@ -11,3 +11,15 @@ class NumberBaseArithmeticResultModel {
     required this.step,
   });
 }
+
+class NumberBaseDivisionResultModel extends NumberBaseArithmeticResultModel {
+  final String remainder;
+
+  NumberBaseDivisionResultModel({
+    required super.base,
+    required super.operator,
+    required super.result,
+    required super.step,
+    required this.remainder,
+  });
+}

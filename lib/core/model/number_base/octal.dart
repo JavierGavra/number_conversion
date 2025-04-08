@@ -311,7 +311,74 @@ final class Octal implements NumberBaseCovert, NumberBaseArithmetic<Octal> {
 
   @override
   NumberBaseArithmeticResultModel division(Octal other) {
-    // TODO: implement division
-    throw UnimplementedError();
+    String dividend = value.toString();
+    String divisor = other.value.toString();
+    String quotient = "";
+    String step = "\n";
+
+    if (divisor.replaceAll("0", "") == "") {
+      return NumberBaseDivisionResultModel(
+        base: base,
+        operator: "/",
+        result: "Tidak bisa membagi dengan 0",
+        remainder: "0",
+        step: "#Tidak bisa membagi dengan 0#",
+      );
+    }
+
+    step += "Dividend: $dividend\n";
+    step += "Divisor : $divisor\n";
+    step += "#Menggunakan metode porogapit (Long Division)#\n";
+
+    String current = "";
+    int index = 0;
+
+    while (index < dividend.length) {
+      current += dividend[index];
+      current = current.replaceFirst(RegExp(r"^0+"), "");
+
+      int currentVal = int.parse(current, radix: 8);
+      int divisorVal = int.parse(divisor, radix: 8);
+
+      if (currentVal < divisorVal) {
+        quotient += "0";
+        step +=
+            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
+            "→ $current < $divisor → Quotient: 0\n";
+      } else {
+        int q = currentVal ~/ divisorVal;
+        int mul = q * divisorVal;
+        int remainder = currentVal - mul;
+
+        String subtracted = remainder.toRadixString(8);
+        quotient += q.toRadixString(8);
+        step +=
+            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
+            "→ $current ≥ $divisor → Kurangkan: $current - $divisor = $subtracted "
+            "→ Quotient: ${q.toRadixString(8)}\n";
+
+        current = subtracted;
+      }
+
+      index++;
+    }
+
+    quotient = quotient.replaceFirst(RegExp(r"^0+"), "");
+    if (quotient.isEmpty) quotient = "0";
+
+    step += "\nQuotient: $quotient";
+    if (current.isNotEmpty && current != "0") {
+      step += "\nSisa: $current";
+    }
+
+    step += "\n#Hasil Akhir#";
+
+    return NumberBaseDivisionResultModel(
+      base: base,
+      operator: "/",
+      result: quotient,
+      remainder: current,
+      step: step,
+    );
   }
 }

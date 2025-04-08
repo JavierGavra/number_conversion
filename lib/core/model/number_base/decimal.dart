@@ -226,13 +226,67 @@ final class Decimal implements NumberBaseCovert, NumberBaseArithmetic<Decimal> {
   }
 
   @override
-  NumberBaseArithmeticResultModel division(Decimal other) {
-    String step = "";
+  NumberBaseDivisionResultModel division(Decimal other) {
+    String dividendStr = value.toString();
+    String divisorStr = other.value.toString();
+    String step = "\n";
+    String quotient = "";
 
-    return NumberBaseArithmeticResultModel(
+    int divisor = int.parse(divisorStr);
+    if (divisor == 0) {
+      return NumberBaseDivisionResultModel(
+        base: base,
+        operator: "/",
+        result: "Tidak bisa membagi dengan 0",
+        remainder: "0",
+        step: "#Tidak bisa membagi dengan 0#",
+      );
+    }
+
+    step += "Dividend: $dividendStr\n";
+    step += "Divisor : $divisorStr\n";
+    step += "#Menggunakan metode porogapit#\n";
+
+    String current = "";
+    for (int i = 0; i < dividendStr.length; i++) {
+      current += dividendStr[i];
+
+      current = current.replaceFirst(RegExp(r"^0+"), "");
+      if (current.isEmpty) current = "0";
+
+      int currentNum = int.parse(current);
+      if (currentNum < divisor) {
+        quotient += "0";
+        step +=
+            "Ambil: ${dividendStr.substring(0, i + 1).padLeft(divisorStr.length)} "
+            "→ $currentNum < $divisor → Quotient: 0\n";
+      } else {
+        int q = currentNum ~/ divisor;
+        int mul = q * divisor;
+        int remainder = currentNum - mul;
+        quotient += q.toString();
+        step +=
+            "Ambil: ${dividendStr.substring(0, i + 1).padLeft(divisorStr.length)} "
+            "→ $currentNum ≥ $divisor → $currentNum ÷ $divisor = $q sisa $remainder\n";
+        current = remainder.toString();
+      }
+    }
+
+    quotient = quotient.replaceFirst(RegExp(r"^0+"), "");
+    if (quotient.isEmpty) quotient = "0";
+
+    step += "\nQuotient: $quotient";
+    if (int.parse(current) != 0) {
+      step += "\nSisa: $current";
+    }
+
+    step += "\n#Hasil Akhir#";
+
+    return NumberBaseDivisionResultModel(
       base: base,
       operator: "/",
-      result: (value ~/ other.value).toString(),
+      result: quotient,
+      remainder: current,
       step: step,
     );
   }

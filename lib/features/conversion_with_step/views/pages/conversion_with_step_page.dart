@@ -59,6 +59,12 @@ class _ConversionWithStepPageState extends State<ConversionWithStepPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    context.read<CustomKeyboardBloc>().add(InitialEvent(initialText: "0"));
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ColorScheme color = Theme.of(context).colorScheme;
     final Size screenSize = MediaQuery.sizeOf(context);

@@ -93,6 +93,12 @@ class _NumberSystemArithmeticState extends State<NumberSystemArithmetic> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    context.read<CustomKeyboardBloc>().add(InitialEvent(initialText: "0"));
+  }
+
+  @override
   Widget build(BuildContext context) {
     final ColorScheme color = Theme.of(context).colorScheme;
     final Size screenSize = MediaQuery.sizeOf(context);
@@ -131,7 +137,7 @@ class _NumberSystemArithmeticState extends State<NumberSystemArithmetic> {
                           SizedBox(height: 5),
                           _buildInputSegmen(color),
                           SizedBox(height: 15),
-                          _buildResultSegmen(context, state.resultFormatted),
+                          _buildResultSegmen(context, state),
                           SizedBox(height: 50),
                           Spacer(),
                           _buildSeeStepButton(state.model),
@@ -232,9 +238,23 @@ class _NumberSystemArithmeticState extends State<NumberSystemArithmetic> {
     );
   }
 
-  Widget _buildResultSegmen(BuildContext context, String text) {
+  Widget _buildResultSegmen(
+    BuildContext context,
+    NumberSystemArithmeticState state,
+  ) {
     final ColorScheme color = Theme.of(context).colorScheme;
     final Size screenSize = MediaQuery.sizeOf(context);
+    NumberBaseArithmeticResultModel model = state.model;
+    String text = "";
+
+    if (model is NumberBaseDivisionResultModel) {
+      text = (model.remainder == "0")
+          ? model.result
+          : "${model.result} Sisa ${model.remainder}";
+    } else {
+      text = state.resultFormatted;
+    }
+
     return Container(
       height: 60,
       width: screenSize.width,
