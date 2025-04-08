@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:number_conversion/core/model/number_base/number_base.dart';
+import 'package:number_conversion/core/model/number_base_convert_result_model.dart';
 import 'package:number_conversion/features/conversion_with_step/bloc/conversion_with_step_bloc.dart';
 import 'package:number_conversion/features/conversion_with_step/views/pages/step_page.dart';
 import 'package:number_conversion/features/custom_keyboard/views/widgets/custom_keyboard_widget.dart';
@@ -230,14 +231,13 @@ class _ConversionWithStepPageState extends State<ConversionWithStepPage> {
     );
   }
 
-  Widget _buildSeeStepButton(NumberBaseResultModel model) {
+  Widget _buildSeeStepButton(NumberBaseConvertResultModel model) {
     final Size screenSize = MediaQuery.sizeOf(context);
     return Container(
       width: screenSize.width,
       margin: EdgeInsets.symmetric(horizontal: 10),
       child: FilledButton(
         onPressed: () {
-          print("${_fromBase.value} -> ${_toBase.value}");
           context.pushTransition(
             type: PageTransitionType.bottomToTop,
             curve: Curves.easeInOutCirc,

@@ -1,6 +1,6 @@
 part of 'number_base.dart';
 
-final class Octal implements NumberBaseCovert {
+final class Octal implements NumberBaseCovert, NumberBaseArithmetic<Octal> {
   final base = NumberBaseType.octal;
   int value;
 
@@ -35,7 +35,7 @@ final class Octal implements NumberBaseCovert {
   }
 
   @override
-  NumberBaseResultModel toBinary() {
+  NumberBaseConvertResultModel toBinary() {
     String octal = value.toString();
     String step = "#Ubah setiap elemen menjadi binary 3 bit#\n";
     String result = "";
@@ -54,7 +54,7 @@ final class Octal implements NumberBaseCovert {
       result += element;
     }
 
-    return NumberBaseResultModel(
+    return NumberBaseConvertResultModel(
       initialValue: value.toString(),
       fromBase: base,
       toBase: NumberBaseType.binary,
@@ -64,7 +64,7 @@ final class Octal implements NumberBaseCovert {
   }
 
   @override
-  NumberBaseResultModel toOctal() => NumberBaseResultModel.noStep(
+  NumberBaseConvertResultModel toOctal() => NumberBaseConvertResultModel.noStep(
         initialValue: value.toString(),
         fromBase: base,
         toBase: NumberBaseType.octal,
@@ -72,7 +72,7 @@ final class Octal implements NumberBaseCovert {
       );
 
   @override
-  NumberBaseResultModel toDecimal() {
+  NumberBaseConvertResultModel toDecimal() {
     String octal = value.toString();
     int result = 0;
     String step = "#Hitung dari kanan agar mudah#\n";
@@ -89,7 +89,7 @@ final class Octal implements NumberBaseCovert {
 
     step += "#Jumlahkan semua hasil#";
 
-    return NumberBaseResultModel(
+    return NumberBaseConvertResultModel(
       initialValue: value.toString(),
       fromBase: base,
       toBase: NumberBaseType.decimal,
@@ -99,8 +99,8 @@ final class Octal implements NumberBaseCovert {
   }
 
   @override
-  NumberBaseResultModel toHexadecimal() {
-    NumberBaseResultModel binary = toBinary();
+  NumberBaseConvertResultModel toHexadecimal() {
+    NumberBaseConvertResultModel binary = toBinary();
     String step = binary.step;
     String result = "";
 
@@ -139,12 +139,179 @@ final class Octal implements NumberBaseCovert {
 
     step += "#Gabungkan hasil konversi dari atas#";
 
-    return NumberBaseResultModel(
+    return NumberBaseConvertResultModel(
       initialValue: value.toString(),
       fromBase: base,
       toBase: NumberBaseType.hexadecimal,
       result: result,
       step: step,
     );
+  }
+
+  @override
+  NumberBaseArithmeticResultModel addition(Octal other) {
+    String octalA = value.toString();
+    String octalB = other.value.toString();
+    String step =
+        "#Pastikan panjang kedua octal sama. jika tidak, tambahkan 0 di depan#\n";
+    String result = "";
+    int carry = 0;
+
+    while (octalA.length < octalB.length) {
+      octalA = "0$octalA";
+    }
+    while (octalA.length > octalB.length) {
+      octalB = "0$octalB";
+    }
+
+    step += "A: $octalA\nB: $octalB\n";
+    step +=
+        "#Lakukan penjumlahan dari kanan ke kiri dengan aturan basis angka 8#";
+    step +=
+        "#Jika hasil lebih dari 7, simpan kelebihan (carry) untuk ditambahkan ke angka berikutnya#\n";
+
+    for (int i = octalA.length - 1; i >= 0; i--) {
+      int digitA = int.parse(octalA[i]);
+      int digitB = int.parse(octalB[i]);
+
+      int sum = digitA + digitB + carry;
+      int newDigit = sum % 8;
+      step +=
+          "Digit ke-${octalA.length - i}: $digitA + $digitB + carry($carry) = $newDigit";
+
+      carry = sum ~/ 8;
+      if (carry > 0) step += " -> simpan $carry";
+
+      result = newDigit.toString() + result;
+      step += "\n";
+    }
+
+    step += "#Susun angka dari bawah#";
+
+    if (carry > 0) {
+      step += "#Karena carry masih memiliki nilai, tambahkan carry di depan#";
+      result = "$carry$result";
+    }
+
+    return NumberBaseArithmeticResultModel(
+      base: base,
+      operator: "+",
+      result: result,
+      step: step,
+    );
+  }
+
+  @override
+  NumberBaseArithmeticResultModel subtraction(Octal other) {
+    String octalA = value.toString();
+    String octalB = other.value.toString();
+    String step =
+        "#Pastikan panjang kedua octal sama. jika tidak, tambahkan 0 di depan#\n";
+    String result = "";
+    int borrow = 0;
+    bool isNegative = false;
+
+    while (octalA.length < octalB.length) {
+      octalA = "0$octalA";
+    }
+    while (octalA.length > octalB.length) {
+      octalB = "0$octalB";
+    }
+
+    step += "A: $octalA\nB: $octalB\n";
+
+    if (octalA.compareTo(octalB) < 0) {
+      step +=
+          "#Karena A lebih kecil dari B, hasil akan negatif. Tukar A dan B lalu lanjutkan perhitungan#\n";
+      isNegative = true;
+      String temp = octalA;
+      octalA = octalB;
+      octalB = temp;
+    }
+
+    step +=
+        "#Lakukan pengurangan dari kanan ke kiri dengan aturan basis angka 8#";
+    step +=
+        "#Jika pada digit ke-n nilai A kurang dari B, maka pinjam 1 dari kiri#\n";
+
+    for (int i = octalA.length - 1; i >= 0; i--) {
+      int digitA = int.parse(octalA[i]);
+      int digitB = int.parse(octalB[i]);
+      int newDigit;
+
+      step +=
+          "Digit ke-${octalA.length - i}: $digitA - borrow($borrow) - $digitB = ";
+
+      if (digitA - borrow < digitB) {
+        newDigit = (digitA - borrow + 8 - digitB);
+        step += "(pinjam 1) → $newDigit\n";
+        borrow = 1;
+      } else {
+        newDigit = (digitA - borrow - digitB);
+        step += "$newDigit\n";
+        borrow = 0;
+      }
+      result = "$newDigit$result";
+    }
+
+    result = result.replaceFirst(RegExp(r'^0+'), '');
+    if (result.isEmpty) result = "0";
+
+    if (isNegative) result = "- $result";
+
+    step += "#Susun angka dari bawah#";
+
+    return NumberBaseArithmeticResultModel(
+      base: base,
+      operator: "-",
+      result: result,
+      step: step,
+    );
+  }
+
+  @override
+  NumberBaseArithmeticResultModel multiplication(Octal other) {
+    String octalA = value.toString();
+    String octalB = other.value.toString();
+    String step =
+        "#Kalikan setiap digit dari Octal B ke Octal A satu per satu dengan aturan basis 8#";
+    String result = "0";
+
+    step += "#Tambahkan 0 dibelakang hasil setiap hasil baru#\n";
+
+    String temp;
+    int carry = 0;
+    for (int i = octalA.length - 1; i >= 0; i--) {
+      temp = "0" * (octalA.length - (i + 1));
+      for (int j = octalB.length - 1; j >= 0; j--) {
+        int digitA = int.parse(octalA[i]);
+        int digitB = int.parse(octalB[j]);
+        int newDigit = digitA * digitB + carry;
+
+        temp = "${newDigit % 8}$temp";
+        carry = newDigit ~/ 8;
+      }
+
+      if (carry > 0) temp = "$carry$temp";
+
+      step += "Octal B * Octal A index-$i = $temp\n";
+      result = Octal(int.parse(result)).addition(Octal(int.parse(temp))).result;
+      carry = 0;
+    }
+
+    step += "#Jumlahkan semua hasil#";
+
+    return NumberBaseArithmeticResultModel(
+      base: base,
+      operator: "*",
+      result: result,
+      step: step,
+    );
+  }
+
+  @override
+  NumberBaseArithmeticResultModel division(Octal other) {
+    // TODO: implement division
+    throw UnimplementedError();
   }
 }

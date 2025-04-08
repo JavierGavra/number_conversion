@@ -1,6 +1,7 @@
 part of 'number_base.dart';
 
-final class Hexadecimal implements NumberBaseCovert {
+final class Hexadecimal
+    implements NumberBaseCovert, NumberBaseArithmetic<Hexadecimal> {
   final base = NumberBaseType.hexadecimal;
   String value;
 
@@ -17,6 +18,10 @@ final class Hexadecimal implements NumberBaseCovert {
 
     // A-F
     return charCodeUnit - 55;
+  }
+
+  String _decimalToHexChar(int decimal) {
+    return (decimal > 9) ? String.fromCharCode(decimal + 55) : "$decimal";
   }
 
   int _binaryToDecimal(String binary) {
@@ -42,7 +47,7 @@ final class Hexadecimal implements NumberBaseCovert {
   }
 
   @override
-  NumberBaseResultModel toBinary() {
+  NumberBaseConvertResultModel toBinary() {
     String hexadecimal = value;
     String step = "#Ubah setiap elemen menjadi binary 4 bit#\n";
     String result = "";
@@ -62,7 +67,7 @@ final class Hexadecimal implements NumberBaseCovert {
       result += element;
     }
 
-    return NumberBaseResultModel(
+    return NumberBaseConvertResultModel(
       initialValue: value,
       fromBase: base,
       toBase: NumberBaseType.binary,
@@ -72,8 +77,8 @@ final class Hexadecimal implements NumberBaseCovert {
   }
 
   @override
-  NumberBaseResultModel toOctal() {
-    NumberBaseResultModel binary = toBinary();
+  NumberBaseConvertResultModel toOctal() {
+    NumberBaseConvertResultModel binary = toBinary();
     String step = binary.step;
     String result = "";
 
@@ -103,7 +108,7 @@ final class Hexadecimal implements NumberBaseCovert {
 
     step += "#Gabungkan hasil konversi dari atas#";
 
-    return NumberBaseResultModel(
+    return NumberBaseConvertResultModel(
       initialValue: value,
       fromBase: base,
       toBase: NumberBaseType.octal,
@@ -113,7 +118,7 @@ final class Hexadecimal implements NumberBaseCovert {
   }
 
   @override
-  NumberBaseResultModel toDecimal() {
+  NumberBaseConvertResultModel toDecimal() {
     String hexadecimal = value;
     int result = 0;
     String step = "#Konversi masing-masing hexadecimal menjadi decimal#\n";
@@ -139,7 +144,7 @@ final class Hexadecimal implements NumberBaseCovert {
 
     step += "#Jumlahkan semua hasil#";
 
-    return NumberBaseResultModel(
+    return NumberBaseConvertResultModel(
       initialValue: value,
       fromBase: base,
       toBase: NumberBaseType.decimal,
@@ -149,10 +154,178 @@ final class Hexadecimal implements NumberBaseCovert {
   }
 
   @override
-  NumberBaseResultModel toHexadecimal() => NumberBaseResultModel.noStep(
+  NumberBaseConvertResultModel toHexadecimal() =>
+      NumberBaseConvertResultModel.noStep(
         initialValue: value,
         fromBase: base,
         toBase: NumberBaseType.hexadecimal,
         result: value,
       );
+
+  @override
+  NumberBaseArithmeticResultModel addition(Hexadecimal other) {
+    String hexadecimalA = value.toString();
+    String hexadecimalB = other.value.toString();
+    String step =
+        "#Pastikan panjang kedua hexadecimal sama. jika tidak, tambahkan 0 di depan#\n";
+    String result = "";
+    int carry = 0;
+
+    while (hexadecimalA.length < hexadecimalB.length) {
+      hexadecimalA = "0$hexadecimalA";
+    }
+    while (hexadecimalA.length > hexadecimalB.length) {
+      hexadecimalB = "0$hexadecimalB";
+    }
+
+    step += "A: $hexadecimalA\nB: $hexadecimalB\n";
+    step +=
+        "#Lakukan penjumlahan dari kanan ke kiri dengan aturan basis angka 16#";
+    step +=
+        "#Jika hasil lebih dari 15 (F), simpan kelebihan (carry) untuk ditambahkan ke angka berikutnya#\n";
+
+    for (int i = hexadecimalA.length - 1; i >= 0; i--) {
+      int digitA = _hexCharToDecimal(hexadecimalA[i]);
+      int digitB = _hexCharToDecimal(hexadecimalB[i]);
+
+      int sum = digitA + digitB + carry;
+      int newDigit = sum % 16;
+      step +=
+          "Digit ke-${hexadecimalA.length - i}: $digitA + $digitB + carry($carry) = $newDigit";
+
+      carry = sum ~/ 16;
+      if (carry > 0) step += " -> simpan $carry";
+
+      result = _decimalToHexChar(newDigit) + result;
+      step += "\n";
+    }
+
+    step += "#Susun angka dari bawah#";
+
+    if (carry > 0) {
+      step += "#Karena carry masih memiliki nilai, tambahkan carry di depan#";
+      result = "$carry$result";
+    }
+
+    return NumberBaseArithmeticResultModel(
+      base: base,
+      operator: "+",
+      result: result,
+      step: step,
+    );
+  }
+
+  @override
+  NumberBaseArithmeticResultModel subtraction(Hexadecimal other) {
+    String hexadecimalA = value.toString();
+    String hexadecimalB = other.value.toString();
+    String step =
+        "#Pastikan panjang kedua hexadecimal sama. jika tidak, tambahkan 0 di depan#\n";
+    String result = "";
+    int borrow = 0;
+    bool isNegative = false;
+
+    while (hexadecimalA.length < hexadecimalB.length) {
+      hexadecimalA = "0$hexadecimalA";
+    }
+    while (hexadecimalA.length > hexadecimalB.length) {
+      hexadecimalB = "0$hexadecimalB";
+    }
+
+    step += "A: $hexadecimalA\nB: $hexadecimalB\n";
+
+    if (hexadecimalA.compareTo(hexadecimalB) < 0) {
+      step +=
+          "#Karena A lebih kecil dari B, hasil akan negatif. Tukar A dan B lalu lanjutkan perhitungan#\n";
+      isNegative = true;
+      String temp = hexadecimalA;
+      hexadecimalA = hexadecimalB;
+      hexadecimalB = temp;
+    }
+
+    step +=
+        "#Lakukan pengurangan dari kanan ke kiri dengan aturan basis angka 16#";
+    step +=
+        "#Jika pada digit ke-n nilai A kurang dari B, maka pinjam 1 dari kiri#\n";
+
+    for (int i = hexadecimalA.length - 1; i >= 0; i--) {
+      int digitA = _hexCharToDecimal(hexadecimalA[i]);
+      int digitB = _hexCharToDecimal(hexadecimalB[i]);
+      int newDigit;
+
+      step +=
+          "Digit ke-${hexadecimalA.length - i}: $digitA - borrow($borrow) - $digitB = ";
+
+      if (digitA - borrow < digitB) {
+        newDigit = (digitA - borrow + 16 - digitB);
+        step += "(pinjam 1) → $newDigit\n";
+        borrow = 1;
+      } else {
+        newDigit = (digitA - borrow - digitB);
+        step += "$newDigit\n";
+        borrow = 0;
+      }
+      result = _decimalToHexChar(newDigit) + result;
+    }
+
+    result = result.replaceFirst(RegExp(r'^0+'), '');
+    if (result.isEmpty) result = "0";
+
+    if (isNegative) result = "- $result";
+
+    step += "#Susun angka dari bawah#";
+
+    return NumberBaseArithmeticResultModel(
+      base: base,
+      operator: "-",
+      result: result,
+      step: step,
+    );
+  }
+
+  @override
+  NumberBaseArithmeticResultModel multiplication(Hexadecimal other) {
+    String hexadecimalA = value;
+    String hexadecimalB = other.value;
+    String step =
+        "#Kalikan setiap digit dari Hexadecimal B ke Hexadecimal A satu per satu dengan aturan basis 8#";
+    String result = "0";
+
+    step += "#Tambahkan 0 dibelakang hasil setiap hasil baru#\n";
+
+    String temp;
+    int carry = 0;
+    for (int i = hexadecimalA.length - 1; i >= 0; i--) {
+      temp = "0" * (hexadecimalA.length - (i + 1));
+      for (int j = hexadecimalB.length - 1; j >= 0; j--) {
+        int digitA = _hexCharToDecimal(hexadecimalA[i]);
+        int digitB = _hexCharToDecimal(hexadecimalB[j]);
+        int newDigit = digitA * digitB + carry;
+
+        temp = "${_decimalToHexChar(newDigit % 16)}$temp";
+        carry = newDigit ~/ 16;
+      }
+
+      if (carry > 0) temp = "$carry$temp";
+
+      step += "Hexadecimal B * Hexadecimal A index-$i = $temp\n";
+      result = Hexadecimal(result).addition(Hexadecimal(temp)).result;
+      carry = 0;
+    }
+
+    step += "#Jumlahkan semua hasil#";
+
+    return NumberBaseArithmeticResultModel(
+      base: base,
+      operator: "*",
+      result: result,
+      step: step,
+    );
+  }
+
+  @override
+  NumberBaseArithmeticResultModel division(Hexadecimal other) {
+    // TODO: implement division
+    throw UnimplementedError();
+  }
 }

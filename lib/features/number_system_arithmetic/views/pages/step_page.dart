@@ -2,13 +2,20 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:number_conversion/core/model/number_base/number_base.dart';
-import 'package:number_conversion/core/model/number_base_convert_result_model.dart';
+import 'package:number_conversion/core/model/number_base_arithmetic_result_model.dart';
 import 'package:number_conversion/core/utils/format_text.dart';
 
 class StepPage extends StatelessWidget {
-  final NumberBaseConvertResultModel model;
+  final String numberBase1;
+  final String numberBase2;
+  final NumberBaseArithmeticResultModel model;
 
-  const StepPage(this.model, {super.key});
+  const StepPage({
+    super.key,
+    required this.numberBase1,
+    required this.numberBase2,
+    required this.model,
+  });
 
   List<Widget> _formatStep(ColorScheme color, String text) {
     List<Widget> widgets = [];
@@ -53,6 +60,21 @@ class StepPage extends StatelessWidget {
     }
   }
 
+  String _formatOperator(String operator) {
+    switch (operator) {
+      case "+":
+        return "Penjumlahan";
+      case "-":
+        return "Penguranga";
+      case "*":
+        return "Perkalian";
+      case "/":
+        return "Pembagian";
+      default:
+        return "_";
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final ColorScheme color = Theme.of(context).colorScheme;
@@ -86,7 +108,11 @@ class StepPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   _buildHeader(color),
-                  _buildStepContent(color, "\n${model.initialValue}\n", true),
+                  _buildStepContent(
+                    color,
+                    "\n$numberBase1 ${model.operator} $numberBase2\n",
+                    true,
+                  ),
                   ..._formatStep(color, model.step),
                   _buildResult(color),
                   SizedBox(height: 30),
@@ -103,29 +129,14 @@ class StepPage extends StatelessWidget {
     return Container(
       color: Colors.transparent,
       padding: const EdgeInsets.only(top: 40, bottom: 32),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            _formatNumberBase(model.fromBase),
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w500,
-              color: color.onPrimary,
-            ),
-          ),
-          SizedBox(width: 5),
-          Icon(Icons.arrow_right_alt_rounded, color: color.primaryContainer),
-          SizedBox(width: 5),
-          Text(
-            _formatNumberBase(model.toBase),
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.w500,
-              color: color.onPrimary,
-            ),
-          ),
-        ],
+      alignment: Alignment.center,
+      child: Text(
+        "${_formatOperator(model.operator)} ${_formatNumberBase(model.base)}",
+        style: TextStyle(
+          fontSize: 24,
+          fontWeight: FontWeight.w500,
+          color: color.onPrimary,
+        ),
       ),
     );
   }
@@ -133,13 +144,13 @@ class StepPage extends StatelessWidget {
   Widget _buildResult(ColorScheme color) {
     String formatResult = "";
 
-    if (model.toBase == NumberBaseType.binary) {
+    if (model.base == NumberBaseType.binary) {
       formatResult = formatBinary(model.result);
-    } else if (model.toBase == NumberBaseType.decimal) {
+    } else if (model.base == NumberBaseType.decimal) {
       formatResult = formatDecimal(model.result);
-    } else if (model.toBase == NumberBaseType.octal) {
+    } else if (model.base == NumberBaseType.octal) {
       formatResult = formatOctal(model.result);
-    } else if (model.toBase == NumberBaseType.hexadecimal) {
+    } else if (model.base == NumberBaseType.hexadecimal) {
       formatResult = formatHexadecimal(model.result);
     }
 

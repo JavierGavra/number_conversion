@@ -25,8 +25,6 @@ class MyApp extends StatelessWidget {
           useMaterial3: true,
         ),
         home: const MainMenu(),
-        // home: const ConversionWithStepPage(),
-        // home: const RealTimeConversionPage(),
       ),
     );
   }
