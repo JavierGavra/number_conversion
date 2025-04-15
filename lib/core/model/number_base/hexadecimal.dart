@@ -166,8 +166,6 @@ final class Hexadecimal
   NumberBaseArithmeticResultModel addition(Hexadecimal other) {
     String hexadecimalA = value.toString();
     String hexadecimalB = other.value.toString();
-    String step =
-        "#Pastikan panjang kedua hexadecimal sama. jika tidak, tambahkan 0 di depan#\n";
     String result = "";
     int carry = 0;
 
@@ -178,34 +176,25 @@ final class Hexadecimal
       hexadecimalB = "0$hexadecimalB";
     }
 
-    step += "A: $hexadecimalA\nB: $hexadecimalB\n";
-    step +=
-        "#Lakukan penjumlahan dari kanan ke kiri dengan aturan basis angka 16#";
-    step +=
-        "#Jika hasil lebih dari 15 (F), simpan kelebihan (carry) untuk ditambahkan ke angka berikutnya#\n";
-
     for (int i = hexadecimalA.length - 1; i >= 0; i--) {
       int digitA = _hexCharToDecimal(hexadecimalA[i]);
       int digitB = _hexCharToDecimal(hexadecimalB[i]);
 
       int sum = digitA + digitB + carry;
       int newDigit = sum % 16;
-      step +=
-          "Digit ke-${hexadecimalA.length - i}: $digitA + $digitB + carry($carry) = $newDigit";
 
       carry = sum ~/ 16;
-      if (carry > 0) step += " -> simpan $carry";
 
       result = _decimalToHexChar(newDigit) + result;
-      step += "\n";
     }
 
-    step += "#Susun angka dari bawah#";
+    if (carry > 0) result = "$carry$result";
 
-    if (carry > 0) {
-      step += "#Karena carry masih memiliki nilai, tambahkan carry di depan#";
-      result = "$carry$result";
-    }
+    int padLeft = result.length + 2;
+    String step = "${value.toString().padLeft(padLeft)}\n";
+    step += "${other.value.toString().padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} +\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -219,11 +208,12 @@ final class Hexadecimal
   NumberBaseArithmeticResultModel subtraction(Hexadecimal other) {
     String hexadecimalA = value.toString();
     String hexadecimalB = other.value.toString();
-    String step =
-        "#Pastikan panjang kedua hexadecimal sama. jika tidak, tambahkan 0 di depan#\n";
     String result = "";
     int borrow = 0;
     bool isNegative = false;
+
+    int padLeft = hexadecimalA.length;
+    if (padLeft < hexadecimalB.length) padLeft = hexadecimalB.length;
 
     while (hexadecimalA.length < hexadecimalB.length) {
       hexadecimalA = "0$hexadecimalA";
@@ -232,37 +222,23 @@ final class Hexadecimal
       hexadecimalB = "0$hexadecimalB";
     }
 
-    step += "A: $hexadecimalA\nB: $hexadecimalB\n";
-
     if (hexadecimalA.compareTo(hexadecimalB) < 0) {
-      step +=
-          "#Karena A lebih kecil dari B, hasil akan negatif. Tukar A dan B lalu lanjutkan perhitungan#\n";
       isNegative = true;
       String temp = hexadecimalA;
       hexadecimalA = hexadecimalB;
       hexadecimalB = temp;
     }
 
-    step +=
-        "#Lakukan pengurangan dari kanan ke kiri dengan aturan basis angka 16#";
-    step +=
-        "#Jika pada digit ke-n nilai A kurang dari B, maka pinjam 1 dari kiri#\n";
-
     for (int i = hexadecimalA.length - 1; i >= 0; i--) {
       int digitA = _hexCharToDecimal(hexadecimalA[i]);
       int digitB = _hexCharToDecimal(hexadecimalB[i]);
       int newDigit;
 
-      step +=
-          "Digit ke-${hexadecimalA.length - i}: $digitA - borrow($borrow) - $digitB = ";
-
       if (digitA - borrow < digitB) {
         newDigit = (digitA - borrow + 16 - digitB);
-        step += "(pinjam 1) → $newDigit\n";
         borrow = 1;
       } else {
         newDigit = (digitA - borrow - digitB);
-        step += "$newDigit\n";
         borrow = 0;
       }
       result = _decimalToHexChar(newDigit) + result;
@@ -271,9 +247,14 @@ final class Hexadecimal
     result = result.replaceFirst(RegExp(r'^0+'), '');
     if (result.isEmpty) result = "0";
 
-    if (isNegative) result = "- $result";
+    if (isNegative) result = "-$result";
 
-    step += "#Susun angka dari bawah#";
+    if (padLeft < result.length) padLeft = result.length;
+    padLeft += 2;
+    String step = "${value.toString().padLeft(padLeft)}\n";
+    step += "${other.value.toString().padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} -\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -287,19 +268,16 @@ final class Hexadecimal
   NumberBaseArithmeticResultModel multiplication(Hexadecimal other) {
     String hexadecimalA = value;
     String hexadecimalB = other.value;
-    String step =
-        "#Kalikan setiap digit dari Hexadecimal B ke Hexadecimal A satu per satu dengan aturan basis 8#";
     String result = "0";
-
-    step += "#Tambahkan 0 dibelakang hasil setiap hasil baru#\n";
+    List<String> subResult = [];
 
     String temp;
     int carry = 0;
-    for (int i = hexadecimalA.length - 1; i >= 0; i--) {
-      temp = "0" * (hexadecimalA.length - (i + 1));
-      for (int j = hexadecimalB.length - 1; j >= 0; j--) {
-        int digitA = _hexCharToDecimal(hexadecimalA[i]);
-        int digitB = _hexCharToDecimal(hexadecimalB[j]);
+    for (int i = hexadecimalB.length - 1; i >= 0; i--) {
+      temp = "";
+      for (int j = hexadecimalA.length - 1; j >= 0; j--) {
+        int digitA = _hexCharToDecimal(hexadecimalA[j]);
+        int digitB = _hexCharToDecimal(hexadecimalB[i]);
         int newDigit = digitA * digitB + carry;
 
         temp = "${_decimalToHexChar(newDigit % 16)}$temp";
@@ -308,12 +286,26 @@ final class Hexadecimal
 
       if (carry > 0) temp = "$carry$temp";
 
-      step += "Hexadecimal B * Hexadecimal A index-$i = $temp\n";
+      subResult.add(temp);
+
+      temp += "0" * (hexadecimalB.length - (i + 1));
       result = Hexadecimal(result).addition(Hexadecimal(temp)).result;
       carry = 0;
     }
 
-    step += "#Jumlahkan semua hasil#";
+    int padLeft = hexadecimalA.length;
+    if (padLeft < hexadecimalB.length) padLeft = hexadecimalB.length;
+    if (padLeft < result.length) padLeft = result.length;
+    padLeft += 2;
+
+    String step = "${hexadecimalA.padLeft(padLeft)}\n";
+    step += "${hexadecimalB.padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} x\n";
+    for (int i = 0; i < subResult.length; i++) {
+      step += "${subResult[i].padLeft(padLeft - i)}\n";
+    }
+    step += "  ${"-" * (padLeft - 2)} +\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -324,82 +316,71 @@ final class Hexadecimal
   }
 
   @override
-  NumberBaseArithmeticResultModel division(Hexadecimal other) {
-    String dividend = value.toUpperCase();
-    String divisor = other.value.toUpperCase();
+  NumberBaseDivisionResultModel division(Hexadecimal other) {
+    String dividendStr = value.toUpperCase();
+    String divisorStr = other.value.toUpperCase();
     String quotient = "";
-    String step = "\n";
+    String remainder = "";
 
-    if (divisor.replaceAll("0", "") == "") {
+    List<String> subtractor = [];
+    List<String> subResult = [];
+
+    int divisorDec = int.parse(divisorStr, radix: 16);
+    if (divisorDec == 0) {
       return NumberBaseDivisionResultModel(
         base: base,
         operator: "/",
         result: "Tidak bisa membagi dengan 0",
         remainder: "0",
-        step: "#Tidak bisa membagi dengan 0#",
+        step: "Tidak bisa membagi dengan 0",
       );
     }
 
-    step += "Dividend: $dividend\n";
-    step += "Divisor : $divisor\n";
-    step += "#Menggunakan metode porogapit (Long Division)#\n";
-
     String current = "";
-    int index = 0;
+    for (int i = 0; i < dividendStr.length; i++) {
+      current += dividendStr[i];
 
-    while (index < dividend.length) {
-      current += dividend[index];
-      current = current.replaceFirst(RegExp(r"^0+"), ""); // Hapus nol di depan
+      current = current.replaceFirst(RegExp(r"^0+"), "");
+      if (current.isEmpty) current = "0";
 
-      if (current.isEmpty) {
-        quotient += "0";
-        index++;
-        continue;
-      }
+      int currentDec = int.parse(current, radix: 16);
+      int q = currentDec ~/ divisorDec;
+      int mul = q * divisorDec;
+      int rem = currentDec - mul;
 
-      int currentVal = int.parse(current, radix: 16);
-      int divisorVal = int.parse(divisor, radix: 16);
+      quotient += q.toRadixString(16).toUpperCase();
+      remainder = rem.toRadixString(16).toUpperCase();
+      current = remainder;
 
-      if (currentVal < divisorVal) {
-        quotient += "0";
-        step +=
-            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
-            "→ $current < $divisor → Quotient: 0\n";
-      } else {
-        int q = currentVal ~/ divisorVal;
-        int mul = q * divisorVal;
-        int remainder = currentVal - mul;
-
-        String subtracted = remainder.toRadixString(16).toUpperCase();
-        quotient += q.toRadixString(16).toUpperCase();
-
-        step +=
-            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
-            "→ $current ≥ $divisor → Kurangkan: $current - $divisor = $subtracted "
-            "→ Quotient: ${q.toRadixString(16).toUpperCase()}\n";
-
-        current = subtracted;
-      }
-
-      index++;
+      subtractor.add(mul.toRadixString(16).toUpperCase());
+      subResult.add(currentDec.toRadixString(16).toUpperCase());
     }
 
-    // Hapus leading zero dari hasil
+    String headStep = "$divisorStr/$dividendStr";
+    int padLeft = headStep.length;
+
+    String step = "${quotient.padLeft(padLeft)}\n";
+    step += "${("-" * dividendStr.length).padLeft(padLeft)}\n";
+    step += "${headStep.padLeft(padLeft)}${" " * (divisorStr.length + 1)}\n";
+    for (int i = 0; i < subtractor.length; i++) {
+      int padLeftLimit = (subtractor.length - i - 1);
+      step += "${subtractor[i].padLeft(padLeft - padLeftLimit)}\n";
+      step += "${("-" * dividendStr.length).padLeft(padLeft)} -\n";
+
+      if (i < subResult.length - 1) {
+        step += "${subResult[i + 1].padLeft(padLeft - (padLeftLimit - 1))}\n";
+      }
+    }
+    step += remainder.padLeft(padLeft);
+
     quotient = quotient.replaceFirst(RegExp(r"^0+"), "");
     if (quotient.isEmpty) quotient = "0";
-
-    step += "\nQuotient: $quotient";
-    if (current.isNotEmpty && current != "0") {
-      step += "\nSisa: $current";
-    }
-
-    step += "\n#Hasil Akhir#";
 
     return NumberBaseDivisionResultModel(
       base: base,
       operator: "/",
       result: quotient,
-      remainder: current,
+      remainder: remainder,
       step: step,
     );
   }

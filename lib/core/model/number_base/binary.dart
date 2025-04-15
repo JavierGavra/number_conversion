@@ -31,21 +31,6 @@ final class Binary implements NumberBaseCovert, NumberBaseArithmetic<Binary> {
     );
   }
 
-  int _compareBinary(String a, String b) {
-    a = a.replaceFirst(RegExp(r"^0+"), "");
-    b = b.replaceFirst(RegExp(r"^0+"), "");
-
-    if (a.length != b.length) {
-      return a.length.compareTo(b.length);
-    }
-
-    for (int i = 0; i < a.length; i++) {
-      if (a[i] != b[i]) return a[i].compareTo(b[i]);
-    }
-
-    return 0;
-  }
-
   @override
   NumberBaseConvertResultModel toBinary() =>
       NumberBaseConvertResultModel.noStep(
@@ -147,8 +132,6 @@ final class Binary implements NumberBaseCovert, NumberBaseArithmetic<Binary> {
   NumberBaseArithmeticResultModel addition(Binary other) {
     String binaryA = value;
     String binaryB = other.value;
-    String step =
-        "#Pastikan panjang kedua binary sama. jika tidak, tambahkan 0 di depan#\n";
     String result = "";
     int carry = 0;
 
@@ -159,34 +142,25 @@ final class Binary implements NumberBaseCovert, NumberBaseArithmetic<Binary> {
       binaryB = "0$binaryB";
     }
 
-    step += "A: $binaryA\nB: $binaryB\n";
-    step +=
-        "#Lakukan penjumlahan dari kanan ke kiri dengan aturan basis angka 2#";
-    step +=
-        "#Jika hasil lebih dari 1, simpan kelebihan (carry) untuk ditambahkan ke angka berikutnya#\n";
-
     for (int i = binaryA.length - 1; i >= 0; i--) {
       int bitA = int.parse(binaryA[i]);
       int bitB = int.parse(binaryB[i]);
 
       int sum = bitA + bitB + carry;
       int newBit = sum % 2;
-      step +=
-          "Digit ke-${binaryA.length - i}: $bitA + $bitB + carry($carry) = $newBit";
 
       carry = sum ~/ 2;
-      if (carry > 0) step += " -> simpan $carry";
 
       result = newBit.toString() + result;
-      step += "\n";
     }
 
-    step += "#Susun angka dari bawah#";
+    if (carry > 0) result = "$carry$result";
 
-    if (carry > 0) {
-      step += "#Karena carry masih memiliki nilai, tambahkan carry di depan#";
-      result = "$carry$result";
-    }
+    int padLeft = result.length + 2;
+    String step = "${value.toString().padLeft(padLeft)}\n";
+    step += "${other.value.toString().padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} +\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -200,11 +174,12 @@ final class Binary implements NumberBaseCovert, NumberBaseArithmetic<Binary> {
   NumberBaseArithmeticResultModel subtraction(Binary other) {
     String binaryA = value;
     String binaryB = other.value;
-    String step =
-        "#Pastikan panjang kedua binary sama. Jika tidak, tambahkan 0 di depan#\n";
     String result = "";
     int borrow = 0;
     bool isNegative = false;
+
+    int padLeft = binaryA.length;
+    if (padLeft < binaryB.length) padLeft = binaryB.length;
 
     while (binaryA.length < binaryB.length) {
       binaryA = "0$binaryA";
@@ -213,37 +188,23 @@ final class Binary implements NumberBaseCovert, NumberBaseArithmetic<Binary> {
       binaryB = "0$binaryB";
     }
 
-    step += "A: $binaryA\nB: $binaryB\n";
-
     if (binaryA.compareTo(binaryB) < 0) {
-      step +=
-          "#Karena A lebih kecil dari B, hasil akan negatif. Tukar A dan B lalu lanjutkan perhitungan#\n";
       isNegative = true;
       String temp = binaryA;
       binaryA = binaryB;
       binaryB = temp;
     }
 
-    step +=
-        "#Lakukan pengurangan dari kanan ke kiri dengan aturan basis angka 2#";
-    step +=
-        "#Jika pada digit ke-n nilai A kurang dari B, maka pinjam 1 dari kiri#\n";
-
     for (int i = binaryA.length - 1; i >= 0; i--) {
       int bitA = int.parse(binaryA[i]);
       int bitB = int.parse(binaryB[i]);
       int newDigit;
 
-      step +=
-          "Digit ke-${binaryA.length - i}: $bitA - borrow($borrow) - $bitB = ";
-
       if (bitA - borrow < bitB) {
         newDigit = (bitA - borrow + 2 - bitB);
-        step += "(pinjam 1) → $newDigit\n";
         borrow = 1;
       } else {
         newDigit = (bitA - borrow - bitB);
-        step += "$newDigit\n";
         borrow = 0;
       }
       result = "$newDigit$result";
@@ -252,9 +213,14 @@ final class Binary implements NumberBaseCovert, NumberBaseArithmetic<Binary> {
     result = result.replaceFirst(RegExp(r'^0+'), '');
     if (result.isEmpty) result = "0";
 
-    if (isNegative) result = "- $result";
+    if (isNegative) result = "-$result";
 
-    step += "#Susun angka dari bawah#";
+    if (padLeft < result.length) padLeft = result.length;
+    padLeft += 2;
+    String step = "${value.toString().padLeft(padLeft)}\n";
+    step += "${other.value.toString().padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} -\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -268,25 +234,37 @@ final class Binary implements NumberBaseCovert, NumberBaseArithmetic<Binary> {
   NumberBaseArithmeticResultModel multiplication(Binary other) {
     String binaryA = value;
     String binaryB = other.value;
-    String step =
-        "#Kalikan setiap digit dari Binary B ke Binary A satu per satu dengan aturan basis 2#";
     String result = "0";
-
-    step += "#Tambahkan 0 dibelakang hasil sepanjang index#\n";
+    List<String> subResult = [];
 
     String temp;
-    for (int i = binaryA.length - 1; i >= 0; i--) {
-      temp = "0" * (binaryA.length - (i + 1));
-      for (int j = binaryB.length - 1; j >= 0; j--) {
-        int digitA = int.parse(binaryA[i]);
-        int digitB = int.parse(binaryB[j]);
+    for (int i = binaryB.length - 1; i >= 0; i--) {
+      temp = "";
+      for (int j = binaryA.length - 1; j >= 0; j--) {
+        int digitA = int.parse(binaryA[j]);
+        int digitB = int.parse(binaryB[i]);
         temp = "${digitA * digitB}$temp";
       }
-      step += "Binary B * Binary A index-$i = $temp\n";
+
+      subResult.add(temp);
+
+      temp += "0" * (binaryB.length - (i + 1));
       result = Binary(result).addition(Binary(temp)).result;
     }
 
-    step += "#Jumlahkan semua hasil#";
+    int padLeft = binaryA.length;
+    if (padLeft < binaryB.length) padLeft = binaryB.length;
+    if (padLeft < result.length) padLeft = result.length;
+    padLeft += 2;
+
+    String step = "${binaryA.padLeft(padLeft)}\n";
+    step += "${binaryB.padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} x\n";
+    for (int i = 0; i < subResult.length; i++) {
+      step += "${subResult[i].padLeft(padLeft - i)}\n";
+    }
+    step += "  ${"-" * (padLeft - 2)} +\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -297,65 +275,71 @@ final class Binary implements NumberBaseCovert, NumberBaseArithmetic<Binary> {
   }
 
   @override
-  NumberBaseArithmeticResultModel division(Binary other) {
-    String dividend = value;
-    String divisor = other.value;
+  NumberBaseDivisionResultModel division(Binary other) {
+    String dividendStr = value.toString();
+    String divisorStr = other.value.toString();
     String quotient = "";
-    String step = "\n";
+    String remainder = "";
 
-    if (divisor.replaceAll("0", "") == "") {
+    List<String> subtractor = [];
+    List<String> subResult = [];
+
+    int divisorDec = int.parse(divisorStr, radix: 2);
+    if (divisorDec == 0) {
       return NumberBaseDivisionResultModel(
         base: base,
         operator: "/",
         result: "Tidak bisa membagi dengan 0",
         remainder: "0",
-        step: "#Tidak bisa membagi dengan 0#",
+        step: "Tidak bisa membagi dengan 0",
       );
     }
 
-    step += "Dividend: $dividend\n";
-    step += "Divisor : $divisor\n";
-    step += "#Menggunakan metode porogapit (Long Division)#\n";
-
     String current = "";
-    int index = 0;
+    for (int i = 0; i < dividendStr.length; i++) {
+      current += dividendStr[i];
 
-    while (index < dividend.length) {
-      current += dividend[index];
-      current = current.replaceFirst(RegExp(r"^0+"), ""); // hapus nol di depan
+      current = current.replaceFirst(RegExp(r"^0+"), "");
+      if (current.isEmpty) current = "0";
 
-      if (current.isEmpty || _compareBinary(current, divisor) < 0) {
-        quotient += "0";
-        step +=
-            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
-            "→ $current < $divisor → Quotient: 0\n";
-      } else {
-        String subtracted = Binary(current).subtraction(Binary(divisor)).result;
-        step +=
-            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
-            "→ $current ≥ $divisor → Kurangkan: $current - $divisor = $subtracted → Quotient: 1\n";
-        quotient += "1";
-        current = subtracted;
-      }
+      int currentDec = int.parse(current, radix: 2);
+      int q = currentDec ~/ divisorDec;
+      int mul = q * divisorDec;
+      int rem = currentDec - mul;
 
-      index++;
+      quotient += q.toString();
+      remainder = rem.toRadixString(2);
+      current = remainder;
+
+      subtractor.add(mul.toRadixString(2));
+      subResult.add(currentDec.toRadixString(2));
     }
+
+    String headStep = "$divisorStr/$dividendStr";
+    int padLeft = headStep.length;
+
+    String step = "${quotient.padLeft(padLeft)}\n";
+    step += "${("-" * dividendStr.length).padLeft(padLeft)}\n";
+    step += "${headStep.padLeft(padLeft)}${" " * (divisorStr.length + 1)}\n";
+    for (int i = 0; i < subtractor.length; i++) {
+      int padLeftLimit = (subtractor.length - i - 1);
+      step += "${subtractor[i].padLeft(padLeft - padLeftLimit)}\n";
+      step += "${("-" * dividendStr.length).padLeft(padLeft)} -\n";
+
+      if (i < subResult.length - 1) {
+        step += "${subResult[i + 1].padLeft(padLeft - (padLeftLimit - 1))}\n";
+      }
+    }
+    step += remainder.padLeft(padLeft);
 
     quotient = quotient.replaceFirst(RegExp(r"^0+"), "");
     if (quotient.isEmpty) quotient = "0";
-
-    step += "\nQuotient: $quotient";
-    if (current.isNotEmpty && current != "0") {
-      step += "\nSisa: $current";
-    }
-
-    step += "\n#Hasil Akhir#";
 
     return NumberBaseDivisionResultModel(
       base: base,
       operator: "/",
       result: quotient,
-      remainder: current,
+      remainder: remainder,
       step: step,
     );
   }

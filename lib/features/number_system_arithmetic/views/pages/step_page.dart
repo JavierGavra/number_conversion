@@ -17,34 +17,6 @@ class StepPage extends StatelessWidget {
     required this.model,
   });
 
-  List<Widget> _formatStep(ColorScheme color, String text) {
-    List<Widget> widgets = [];
-    RegExp regex = RegExp(r'#(.*?)#');
-    Iterable<RegExpMatch> matches = regex.allMatches(text);
-
-    int lastIndex = 0;
-    for (var match in matches) {
-      // Ambil teks biasa
-      if (match.start > lastIndex) {
-        widgets.add(_buildStepContent(
-          color,
-          text.substring(lastIndex, match.start),
-          true,
-        ));
-      }
-      // Ambil teks di dalam #
-      widgets.add(_buildStepContent(color, match.group(1)!, false));
-      lastIndex = match.end;
-    }
-
-    // Tambahkan sisa teks
-    if (lastIndex < text.length) {
-      widgets.add(Text(text.substring(lastIndex)));
-    }
-
-    return widgets;
-  }
-
   String _formatNumberBase(int numberBase) {
     switch (numberBase) {
       case NumberBaseType.binary:
@@ -83,7 +55,7 @@ class StepPage extends StatelessWidget {
     return Scaffold(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
-        title: Text("Langkah Penyelesaian"),
+        title: Text("Visualisasi Penyelesaian"),
         foregroundColor: color.onPrimary,
         backgroundColor: color.primary,
       ),
@@ -110,10 +82,10 @@ class StepPage extends StatelessWidget {
                   _buildHeader(color),
                   _buildStepContent(
                     color,
-                    "\n$numberBase1 ${model.operator} $numberBase2\n",
-                    true,
+                    "$numberBase1 ${model.operator} $numberBase2",
+                    false,
                   ),
-                  ..._formatStep(color, model.step),
+                  _buildStepContent(color, model.step, true),
                   _buildResult(color),
                   SizedBox(height: 30),
                 ],
@@ -142,6 +114,7 @@ class StepPage extends StatelessWidget {
   }
 
   Widget _buildResult(ColorScheme color) {
+    String text = model.result;
     String formatResult = "";
 
     if (model.base == NumberBaseType.binary) {
@@ -152,6 +125,12 @@ class StepPage extends StatelessWidget {
       formatResult = formatOctal(model.result);
     } else if (model.base == NumberBaseType.hexadecimal) {
       formatResult = formatHexadecimal(model.result);
+    }
+
+    NumberBaseArithmeticResultModel temp = model;
+    if (temp is NumberBaseDivisionResultModel && temp.remainder != "0") {
+      text += " sisa ${temp.remainder}";
+      formatResult += " sisa ${temp.remainder}";
     }
 
     return Container(
@@ -172,7 +151,7 @@ class StepPage extends StatelessWidget {
           ),
           SizedBox(height: 2),
           Text(
-            model.result,
+            text,
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 16,
@@ -200,24 +179,23 @@ class StepPage extends StatelessWidget {
     );
   }
 
-  Widget _buildStepContent(ColorScheme color, String text, bool isCalculate) {
+  Widget _buildStepContent(ColorScheme color, String text, bool isVisual) {
     return Container(
       margin: EdgeInsets.symmetric(horizontal: 15, vertical: 7),
-      padding: EdgeInsets.symmetric(
-        horizontal: 15,
-        vertical: isCalculate ? 0 : 7,
-      ),
+      padding: EdgeInsets.symmetric(horizontal: 15),
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: isCalculate ? color.surfaceContainerHighest : color.secondary,
+        color: color.surfaceContainerHighest,
         borderRadius: BorderRadius.circular(15),
       ),
       child: Text(
-        text,
-        textAlign: TextAlign.center,
+        isVisual ? "\n$text\n" : "\n$text\n",
+        textAlign: TextAlign.start,
         style: TextStyle(
-          fontWeight: isCalculate ? null : FontWeight.w500,
-          color: isCalculate ? color.onSurface : color.onSecondary,
+          fontFamily: isVisual ? "RobotoMono" : null,
+          fontWeight: isVisual ? FontWeight.w500 : null,
+          fontSize: isVisual ? 16 : 14,
+          color: color.onSurface,
         ),
       ),
     );

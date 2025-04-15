@@ -298,7 +298,7 @@ class _NumberSystemArithmeticState extends State<NumberSystemArithmetic> {
             borderRadius: BorderRadius.circular(10),
           ),
         ),
-        child: Text("Lihat Langkah Penyelesaian"),
+        child: Text("Lihat Visualisasi Penyelesaian"),
       ),
     );
   }

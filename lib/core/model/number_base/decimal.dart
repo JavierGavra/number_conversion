@@ -67,8 +67,6 @@ final class Decimal implements NumberBaseCovert, NumberBaseArithmetic<Decimal> {
   NumberBaseArithmeticResultModel addition(Decimal other) {
     String decimalA = value.toString();
     String decimalB = other.value.toString();
-    String step =
-        "#Pastikan panjang kedua decimal sama. jika tidak, tambahkan 0 di depan#\n";
     String result = "";
     int carry = 0;
 
@@ -79,34 +77,25 @@ final class Decimal implements NumberBaseCovert, NumberBaseArithmetic<Decimal> {
       decimalB = "0$decimalB";
     }
 
-    step += "A: $decimalA\nB: $decimalB\n";
-    step +=
-        "#Lakukan penjumlahan dari kanan ke kiri dengan aturan basis angka 10#";
-    step +=
-        "#Jika hasil lebih dari 9, simpan kelebihan (carry) untuk ditambahkan ke angka berikutnya#\n";
-
     for (int i = decimalA.length - 1; i >= 0; i--) {
       int digitA = int.parse(decimalA[i]);
       int digitB = int.parse(decimalB[i]);
 
       int sum = digitA + digitB + carry;
       int newDigit = sum % 10;
-      step +=
-          "Digit ke-${decimalA.length - i}: $digitA + $digitB + carry($carry) = $newDigit";
 
       carry = sum ~/ 10;
-      if (carry > 0) step += " -> simpan $carry";
 
       result = newDigit.toString() + result;
-      step += "\n";
     }
 
-    step += "#Susun angka dari bawah#";
+    if (carry > 0) result = "$carry$result";
 
-    if (carry > 0) {
-      step += "#Karena carry masih memiliki nilai, tambahkan carry di depan#";
-      result = "$carry$result";
-    }
+    int padLeft = result.length + 2;
+    String step = "${value.toString().padLeft(padLeft)}\n";
+    step += "${other.value.toString().padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} +\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -120,11 +109,12 @@ final class Decimal implements NumberBaseCovert, NumberBaseArithmetic<Decimal> {
   NumberBaseArithmeticResultModel subtraction(Decimal other) {
     String decimalA = value.toString();
     String decimalB = other.value.toString();
-    String step =
-        "#Pastikan panjang kedua decimal sama. Jika tidak, tambahkan 0 di depan#\n";
     String result = "";
     int borrow = 0;
     bool isNegative = false;
+
+    int padLeft = decimalA.length;
+    if (padLeft < decimalB.length) padLeft = decimalB.length;
 
     while (decimalA.length < decimalB.length) {
       decimalA = "0$decimalA";
@@ -133,37 +123,23 @@ final class Decimal implements NumberBaseCovert, NumberBaseArithmetic<Decimal> {
       decimalB = "0$decimalB";
     }
 
-    step += "A: $decimalA\nB: $decimalB\n";
-
     if (decimalA.compareTo(decimalB) < 0) {
-      step +=
-          "#Karena A lebih kecil dari B, hasil akan negatif. Tukar A dan B lalu lanjutkan perhitungan#\n";
       isNegative = true;
       String temp = decimalA;
       decimalA = decimalB;
       decimalB = temp;
     }
 
-    step +=
-        "#Lakukan pengurangan dari kanan ke kiri dengan aturan basis angka 10#";
-    step +=
-        "#Jika pada digit ke-n nilai A kurang dari B, maka pinjam 1 dari kiri#\n";
-
     for (int i = decimalA.length - 1; i >= 0; i--) {
       int digitA = int.parse(decimalA[i]);
       int digitB = int.parse(decimalB[i]);
       int newDigit;
 
-      step +=
-          "Digit ke-${decimalA.length - i}: $digitA - borrow($borrow) - $digitB = ";
-
       if (digitA - borrow < digitB) {
         newDigit = (digitA - borrow + 10 - digitB);
-        step += "(pinjam 1) → $newDigit\n";
         borrow = 1;
       } else {
         newDigit = (digitA - borrow - digitB);
-        step += "$newDigit\n";
         borrow = 0;
       }
       result = "$newDigit$result";
@@ -172,9 +148,14 @@ final class Decimal implements NumberBaseCovert, NumberBaseArithmetic<Decimal> {
     result = result.replaceFirst(RegExp(r'^0+'), '');
     if (result.isEmpty) result = "0";
 
-    if (isNegative) result = "- $result";
+    if (isNegative) result = "-$result";
 
-    step += "#Susun angka dari bawah#";
+    if (padLeft < result.length) padLeft = result.length;
+    padLeft += 2;
+    String step = "${value.toString().padLeft(padLeft)}\n";
+    step += "${other.value.toString().padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} -\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -188,19 +169,16 @@ final class Decimal implements NumberBaseCovert, NumberBaseArithmetic<Decimal> {
   NumberBaseArithmeticResultModel multiplication(Decimal other) {
     String decimalA = value.toString();
     String decimalB = other.value.toString();
-    String step =
-        "#Kalikan setiap digit dari Decimal B ke Decimal A satu per satu dengan aturan basis 10#";
     String result = "0";
-
-    step += "#Tambahkan 0 dibelakang hasil setiap hasil baru#\n";
+    List<String> subResult = [];
 
     String temp;
     int carry = 0;
-    for (int i = decimalA.length - 1; i >= 0; i--) {
-      temp = "0" * (decimalA.length - (i + 1));
-      for (int j = decimalB.length - 1; j >= 0; j--) {
-        int digitA = int.parse(decimalA[i]);
-        int digitB = int.parse(decimalB[j]);
+    for (int i = decimalB.length - 1; i >= 0; i--) {
+      temp = "";
+      for (int j = decimalA.length - 1; j >= 0; j--) {
+        int digitA = int.parse(decimalA[j]);
+        int digitB = int.parse(decimalB[i]);
         int newDigit = digitA * digitB + carry;
 
         temp = "${newDigit % 10}$temp";
@@ -209,13 +187,27 @@ final class Decimal implements NumberBaseCovert, NumberBaseArithmetic<Decimal> {
 
       if (carry > 0) temp = "$carry$temp";
 
-      step += "Decimal B * Decimal A index-$i = $temp\n";
+      subResult.add(temp);
+
+      temp += "0" * (decimalB.length - (i + 1));
       result =
           Decimal(int.parse(result)).addition(Decimal(int.parse(temp))).result;
       carry = 0;
     }
 
-    step += "#Jumlahkan semua hasil#";
+    int padLeft = decimalA.length;
+    if (padLeft < decimalB.length) padLeft = decimalB.length;
+    if (padLeft < result.length) padLeft = result.length;
+    padLeft += 2;
+
+    String step = "${decimalA.padLeft(padLeft)}\n";
+    step += "${decimalB.padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} x\n";
+    for (int i = 0; i < subResult.length; i++) {
+      step += "${subResult[i].padLeft(padLeft - i)}\n";
+    }
+    step += "  ${"-" * (padLeft - 2)} +\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -229,8 +221,11 @@ final class Decimal implements NumberBaseCovert, NumberBaseArithmetic<Decimal> {
   NumberBaseDivisionResultModel division(Decimal other) {
     String dividendStr = value.toString();
     String divisorStr = other.value.toString();
-    String step = "\n";
     String quotient = "";
+    int remainder = 0;
+
+    List<String> subtractor = [];
+    List<String> subResult = [];
 
     int divisor = int.parse(divisorStr);
     if (divisor == 0) {
@@ -239,13 +234,9 @@ final class Decimal implements NumberBaseCovert, NumberBaseArithmetic<Decimal> {
         operator: "/",
         result: "Tidak bisa membagi dengan 0",
         remainder: "0",
-        step: "#Tidak bisa membagi dengan 0#",
+        step: "Tidak bisa membagi dengan 0",
       );
     }
-
-    step += "Dividend: $dividendStr\n";
-    step += "Divisor : $divisorStr\n";
-    step += "#Menggunakan metode porogapit#\n";
 
     String current = "";
     for (int i = 0; i < dividendStr.length; i++) {
@@ -255,32 +246,35 @@ final class Decimal implements NumberBaseCovert, NumberBaseArithmetic<Decimal> {
       if (current.isEmpty) current = "0";
 
       int currentNum = int.parse(current);
-      if (currentNum < divisor) {
-        quotient += "0";
-        step +=
-            "Ambil: ${dividendStr.substring(0, i + 1).padLeft(divisorStr.length)} "
-            "→ $currentNum < $divisor → Quotient: 0\n";
-      } else {
-        int q = currentNum ~/ divisor;
-        int mul = q * divisor;
-        int remainder = currentNum - mul;
-        quotient += q.toString();
-        step +=
-            "Ambil: ${dividendStr.substring(0, i + 1).padLeft(divisorStr.length)} "
-            "→ $currentNum ≥ $divisor → $currentNum ÷ $divisor = $q sisa $remainder\n";
-        current = remainder.toString();
+      int q = currentNum ~/ divisor;
+      int mul = q * divisor;
+      remainder = currentNum - mul;
+      quotient += q.toString();
+      current = remainder.toString();
+
+      subtractor.add(mul.toString());
+      subResult.add(currentNum.toString());
+    }
+
+    String headStep = "$divisorStr/$dividendStr";
+    int padLeft = headStep.length;
+
+    String step = "${quotient.padLeft(padLeft)}\n";
+    step += "${("-" * dividendStr.length).padLeft(padLeft)}\n";
+    step += "${headStep.padLeft(padLeft)}${" " * (divisorStr.length + 1)}\n";
+    for (int i = 0; i < subtractor.length; i++) {
+      int padLeftLimit = (subtractor.length - i - 1);
+      step += "${subtractor[i].padLeft(padLeft - padLeftLimit)}\n";
+      step += "${("-" * dividendStr.length).padLeft(padLeft)} -\n";
+
+      if (i < subResult.length - 1) {
+        step += "${subResult[i + 1].padLeft(padLeft - (padLeftLimit - 1))}\n";
       }
     }
+    step += remainder.toString().padLeft(padLeft);
 
     quotient = quotient.replaceFirst(RegExp(r"^0+"), "");
     if (quotient.isEmpty) quotient = "0";
-
-    step += "\nQuotient: $quotient";
-    if (int.parse(current) != 0) {
-      step += "\nSisa: $current";
-    }
-
-    step += "\n#Hasil Akhir#";
 
     return NumberBaseDivisionResultModel(
       base: base,

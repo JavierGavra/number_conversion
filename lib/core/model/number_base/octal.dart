@@ -152,8 +152,6 @@ final class Octal implements NumberBaseCovert, NumberBaseArithmetic<Octal> {
   NumberBaseArithmeticResultModel addition(Octal other) {
     String octalA = value.toString();
     String octalB = other.value.toString();
-    String step =
-        "#Pastikan panjang kedua octal sama. jika tidak, tambahkan 0 di depan#\n";
     String result = "";
     int carry = 0;
 
@@ -164,34 +162,25 @@ final class Octal implements NumberBaseCovert, NumberBaseArithmetic<Octal> {
       octalB = "0$octalB";
     }
 
-    step += "A: $octalA\nB: $octalB\n";
-    step +=
-        "#Lakukan penjumlahan dari kanan ke kiri dengan aturan basis angka 8#";
-    step +=
-        "#Jika hasil lebih dari 7, simpan kelebihan (carry) untuk ditambahkan ke angka berikutnya#\n";
-
     for (int i = octalA.length - 1; i >= 0; i--) {
       int digitA = int.parse(octalA[i]);
       int digitB = int.parse(octalB[i]);
 
       int sum = digitA + digitB + carry;
       int newDigit = sum % 8;
-      step +=
-          "Digit ke-${octalA.length - i}: $digitA + $digitB + carry($carry) = $newDigit";
 
       carry = sum ~/ 8;
-      if (carry > 0) step += " -> simpan $carry";
 
       result = newDigit.toString() + result;
-      step += "\n";
     }
 
-    step += "#Susun angka dari bawah#";
+    if (carry > 0) result = "$carry$result";
 
-    if (carry > 0) {
-      step += "#Karena carry masih memiliki nilai, tambahkan carry di depan#";
-      result = "$carry$result";
-    }
+    int padLeft = result.length + 2;
+    String step = "${value.toString().padLeft(padLeft)}\n";
+    step += "${other.value.toString().padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} +\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -205,11 +194,12 @@ final class Octal implements NumberBaseCovert, NumberBaseArithmetic<Octal> {
   NumberBaseArithmeticResultModel subtraction(Octal other) {
     String octalA = value.toString();
     String octalB = other.value.toString();
-    String step =
-        "#Pastikan panjang kedua octal sama. jika tidak, tambahkan 0 di depan#\n";
     String result = "";
     int borrow = 0;
     bool isNegative = false;
+
+    int padLeft = octalA.length;
+    if (padLeft < octalB.length) padLeft = octalB.length;
 
     while (octalA.length < octalB.length) {
       octalA = "0$octalA";
@@ -218,37 +208,23 @@ final class Octal implements NumberBaseCovert, NumberBaseArithmetic<Octal> {
       octalB = "0$octalB";
     }
 
-    step += "A: $octalA\nB: $octalB\n";
-
     if (octalA.compareTo(octalB) < 0) {
-      step +=
-          "#Karena A lebih kecil dari B, hasil akan negatif. Tukar A dan B lalu lanjutkan perhitungan#\n";
       isNegative = true;
       String temp = octalA;
       octalA = octalB;
       octalB = temp;
     }
 
-    step +=
-        "#Lakukan pengurangan dari kanan ke kiri dengan aturan basis angka 8#";
-    step +=
-        "#Jika pada digit ke-n nilai A kurang dari B, maka pinjam 1 dari kiri#\n";
-
     for (int i = octalA.length - 1; i >= 0; i--) {
       int digitA = int.parse(octalA[i]);
       int digitB = int.parse(octalB[i]);
       int newDigit;
 
-      step +=
-          "Digit ke-${octalA.length - i}: $digitA - borrow($borrow) - $digitB = ";
-
       if (digitA - borrow < digitB) {
         newDigit = (digitA - borrow + 8 - digitB);
-        step += "(pinjam 1) → $newDigit\n";
         borrow = 1;
       } else {
         newDigit = (digitA - borrow - digitB);
-        step += "$newDigit\n";
         borrow = 0;
       }
       result = "$newDigit$result";
@@ -257,9 +233,14 @@ final class Octal implements NumberBaseCovert, NumberBaseArithmetic<Octal> {
     result = result.replaceFirst(RegExp(r'^0+'), '');
     if (result.isEmpty) result = "0";
 
-    if (isNegative) result = "- $result";
+    if (isNegative) result = "-$result";
 
-    step += "#Susun angka dari bawah#";
+    if (padLeft < result.length) padLeft = result.length;
+    padLeft += 2;
+    String step = "${value.toString().padLeft(padLeft)}\n";
+    step += "${other.value.toString().padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} -\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -273,19 +254,16 @@ final class Octal implements NumberBaseCovert, NumberBaseArithmetic<Octal> {
   NumberBaseArithmeticResultModel multiplication(Octal other) {
     String octalA = value.toString();
     String octalB = other.value.toString();
-    String step =
-        "#Kalikan setiap digit dari Octal B ke Octal A satu per satu dengan aturan basis 8#";
     String result = "0";
-
-    step += "#Tambahkan 0 dibelakang hasil setiap hasil baru#\n";
+    List<String> subResult = [];
 
     String temp;
     int carry = 0;
-    for (int i = octalA.length - 1; i >= 0; i--) {
-      temp = "0" * (octalA.length - (i + 1));
-      for (int j = octalB.length - 1; j >= 0; j--) {
-        int digitA = int.parse(octalA[i]);
-        int digitB = int.parse(octalB[j]);
+    for (int i = octalB.length - 1; i >= 0; i--) {
+      temp = "";
+      for (int j = octalA.length - 1; j >= 0; j--) {
+        int digitA = int.parse(octalA[j]);
+        int digitB = int.parse(octalB[i]);
         int newDigit = digitA * digitB + carry;
 
         temp = "${newDigit % 8}$temp";
@@ -294,12 +272,26 @@ final class Octal implements NumberBaseCovert, NumberBaseArithmetic<Octal> {
 
       if (carry > 0) temp = "$carry$temp";
 
-      step += "Octal B * Octal A index-$i = $temp\n";
+      subResult.add(temp);
+
+      temp += "0" * (octalB.length - (i + 1));
       result = Octal(int.parse(result)).addition(Octal(int.parse(temp))).result;
       carry = 0;
     }
 
-    step += "#Jumlahkan semua hasil#";
+    int padLeft = octalA.length;
+    if (padLeft < octalB.length) padLeft = octalB.length;
+    if (padLeft < result.length) padLeft = result.length;
+    padLeft += 2;
+
+    String step = "${octalA.padLeft(padLeft)}\n";
+    step += "${octalB.padLeft(padLeft)}\n";
+    step += "  ${"-" * (padLeft - 2)} x\n";
+    for (int i = 0; i < subResult.length; i++) {
+      step += "${subResult[i].padLeft(padLeft - i)}\n";
+    }
+    step += "  ${"-" * (padLeft - 2)} +\n";
+    step += result.padLeft(padLeft);
 
     return NumberBaseArithmeticResultModel(
       base: base,
@@ -310,74 +302,71 @@ final class Octal implements NumberBaseCovert, NumberBaseArithmetic<Octal> {
   }
 
   @override
-  NumberBaseArithmeticResultModel division(Octal other) {
-    String dividend = value.toString();
-    String divisor = other.value.toString();
+  NumberBaseDivisionResultModel division(Octal other) {
+    String dividendStr = value.toString();
+    String divisorStr = other.value.toString();
     String quotient = "";
-    String step = "\n";
+    String remainder = "";
 
-    if (divisor.replaceAll("0", "") == "") {
+    List<String> subtractor = [];
+    List<String> subResult = [];
+
+    int divisorDec = int.parse(divisorStr, radix: 8);
+    if (divisorDec == 0) {
       return NumberBaseDivisionResultModel(
         base: base,
         operator: "/",
         result: "Tidak bisa membagi dengan 0",
         remainder: "0",
-        step: "#Tidak bisa membagi dengan 0#",
+        step: "Tidak bisa membagi dengan 0",
       );
     }
 
-    step += "Dividend: $dividend\n";
-    step += "Divisor : $divisor\n";
-    step += "#Menggunakan metode porogapit (Long Division)#\n";
-
     String current = "";
-    int index = 0;
+    for (int i = 0; i < dividendStr.length; i++) {
+      current += dividendStr[i];
 
-    while (index < dividend.length) {
-      current += dividend[index];
       current = current.replaceFirst(RegExp(r"^0+"), "");
+      if (current.isEmpty) current = "0";
 
-      int currentVal = int.parse(current, radix: 8);
-      int divisorVal = int.parse(divisor, radix: 8);
+      int currentDec = int.parse(current, radix: 8);
+      int q = currentDec ~/ divisorDec;
+      int mul = q * divisorDec;
+      int rem = currentDec - mul;
 
-      if (currentVal < divisorVal) {
-        quotient += "0";
-        step +=
-            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
-            "→ $current < $divisor → Quotient: 0\n";
-      } else {
-        int q = currentVal ~/ divisorVal;
-        int mul = q * divisorVal;
-        int remainder = currentVal - mul;
+      quotient += q.toRadixString(8);
+      remainder = rem.toRadixString(8);
+      current = remainder;
 
-        String subtracted = remainder.toRadixString(8);
-        quotient += q.toRadixString(8);
-        step +=
-            "Ambil: ${dividend.substring(0, index + 1).padLeft(divisor.length)} "
-            "→ $current ≥ $divisor → Kurangkan: $current - $divisor = $subtracted "
-            "→ Quotient: ${q.toRadixString(8)}\n";
-
-        current = subtracted;
-      }
-
-      index++;
+      subtractor.add(mul.toRadixString(8));
+      subResult.add(currentDec.toRadixString(8));
     }
+
+    String headStep = "$divisorStr/$dividendStr";
+    int padLeft = headStep.length;
+
+    String step = "${quotient.padLeft(padLeft)}\n";
+    step += "${("-" * dividendStr.length).padLeft(padLeft)}\n";
+    step += "${headStep.padLeft(padLeft)}${" " * (divisorStr.length + 1)}\n";
+    for (int i = 0; i < subtractor.length; i++) {
+      int padLeftLimit = (subtractor.length - i - 1);
+      step += "${subtractor[i].padLeft(padLeft - padLeftLimit)}\n";
+      step += "${("-" * dividendStr.length).padLeft(padLeft)} -\n";
+
+      if (i < subResult.length - 1) {
+        step += "${subResult[i + 1].padLeft(padLeft - (padLeftLimit - 1))}\n";
+      }
+    }
+    step += remainder.padLeft(padLeft);
 
     quotient = quotient.replaceFirst(RegExp(r"^0+"), "");
     if (quotient.isEmpty) quotient = "0";
-
-    step += "\nQuotient: $quotient";
-    if (current.isNotEmpty && current != "0") {
-      step += "\nSisa: $current";
-    }
-
-    step += "\n#Hasil Akhir#";
 
     return NumberBaseDivisionResultModel(
       base: base,
       operator: "/",
       result: quotient,
-      remainder: current,
+      remainder: remainder,
       step: step,
     );
   }
