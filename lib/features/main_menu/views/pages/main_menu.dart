@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:number_conversion/features/number_system_arithmetic/views/pages/number_system_arithmetic.dart';
 import 'package:number_conversion/features/conversion_with_step/views/pages/conversion_with_step_page.dart';
 import 'package:number_conversion/features/real_time_conversion/views/pages/real_time_conversion_page.dart';
 
@@ -19,23 +20,12 @@ class _MainMenuState extends State<MainMenu> {
   ];
 
   final List<Widget> _widgetOptions = <Widget>[
-    // Text('Index 0: Home', style: optionStyle),
     RealTimeConversionPage(),
     ConversionWithStepPage(),
+    NumberSystemArithmetic(),
   ];
 
-  void _onItemTapped(int index) {
-    if (index == 2) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          behavior: SnackBarBehavior.floating,
-          content: Text("Comming soon..."),
-        ),
-      );
-      return;
-    }
-    setState(() => _selectedIndex = index);
-  }
+  void _onItemTapped(int index) => setState(() => _selectedIndex = index);
 
   @override
   Widget build(BuildContext context) {

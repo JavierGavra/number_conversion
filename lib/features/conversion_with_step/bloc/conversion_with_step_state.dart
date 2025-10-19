@@ -3,7 +3,7 @@ part of 'conversion_with_step_bloc.dart';
 class ConversionWithStepState extends Equatable {
   final String from;
   final String resultFormatted;
-  final NumberBaseResultModel model;
+  final NumberBaseConvertResultModel model;
 
   const ConversionWithStepState({
     required this.from,

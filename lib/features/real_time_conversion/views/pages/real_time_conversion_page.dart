@@ -28,6 +28,12 @@ class _RealTimeConversionPageState extends State<RealTimeConversionPage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    context.read<CustomKeyboardBloc>().add(InitialEvent(initialText: "0"));
+  }
+
+  @override
   Widget build(BuildContext context) {
     final Size screenSize = MediaQuery.sizeOf(context);
     final ColorScheme color = Theme.of(context).colorScheme;

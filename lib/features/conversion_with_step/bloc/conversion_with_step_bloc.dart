@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:number_conversion/core/model/number_base/number_base.dart';
+import 'package:number_conversion/core/model/number_base_convert_result_model.dart';
 import 'package:number_conversion/core/utils/format_text.dart';
 
 part 'conversion_with_step_event.dart';
@@ -17,7 +18,7 @@ class ConversionWithStepBloc
     Emitter<ConversionWithStepState> emit,
   ) async {
     NumberBaseCovert numberBase;
-    NumberBaseResultModel resultModel;
+    NumberBaseConvertResultModel resultModel;
     String resultFormatted;
 
     switch (event.fromBase) {
